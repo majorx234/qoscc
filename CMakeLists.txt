@@ -17,9 +17,18 @@ set(MISC_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/misc.h
 )
 
+set(STRINGLIST_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/stringlist.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/stringlist.h
+)
 set(DBUFFER_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/dbuffer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/dbuffer.h
+)
+
+set(DSPCOMMON_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/dspcommon.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/dspcommon.h
 )
 
 add_library(misc
@@ -28,6 +37,12 @@ add_library(misc
 
 target_include_directories(misc PRIVATE include)
 
+add_library(stringlist
+  ${STRINGLIST_SOURCES}
+)
+
+target_include_directories(stringlist PRIVATE include)
+
 add_library(dbuffer
   ${DBUFFER_SOURCES}
 )
@@ -35,4 +50,15 @@ add_library(dbuffer
 target_include_directories(dbuffer PRIVATE include)
 target_link_libraries(dbuffer
   misc 
+)
+
+add_library(dspcommon
+  ${DSPCOMMON_SOURCES}
+)
+
+target_include_directories(dspcommon PRIVATE include)
+target_link_libraries(dspcommon
+  dbuffer
+  stringlist
+  Threads::Threads
 )
