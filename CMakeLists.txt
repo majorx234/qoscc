@@ -155,3 +155,12 @@ target_link_libraries(qoscwindow PUBLIC
     ${JACK_LIBRARIES}
     Qt5::Core
     Qt5::Widgets)
+
+add_executable(qosc_test
+  src/main.cpp
+)
+
+target_include_directories(qosc_test PRIVATE include)
+target_link_libraries(qosc_test
+  qoscwindow 
+)
