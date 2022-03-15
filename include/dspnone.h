@@ -1,5 +1,5 @@
 //
-// C++ Interface: %{MODULE}
+// C++ Interface: dspnone.h
 //
 // Description:
 //
