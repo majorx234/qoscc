@@ -52,6 +52,17 @@ set(DSPNONE_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/dspnone.h
 )
 
+set(QOSCWINDOW_SOURCES
+    src/qoscwindow.cpp
+    include/qoscwindow.h)
+
+QT5_WRAP_UI(UISrcs 
+            ui/qoscwindow.ui)
+
+QT5_WRAP_CPP( QOSCWINDOW_MOCSOURCES
+  ${QOSCWINDOW_SOURCES}
+)
+
 add_library(misc
   ${MISC_SOURCES}
 )
@@ -127,3 +138,20 @@ target_link_libraries(dspnone
   dspcommon
   dbuffer
 )
+
+add_library(qoscwindow
+            ${QOSCWINDOW_SOURCES}
+            ${QOSCWINDOW_MOCSOURCES}
+            ${UISrcs}
+            )
+
+target_include_directories(qoscwindow PRIVATE include)
+target_include_directories(qoscwindow PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(qoscwindow SYSTEM
+  PUBLIC 
+    ${Qt5Core_INCLUDE_DIRS}
+    ${Qt5Widgets_INCLUDE_DIRS})
+target_link_libraries(qoscwindow PUBLIC 
+    ${JACK_LIBRARIES}
+    Qt5::Core
+    Qt5::Widgets)
