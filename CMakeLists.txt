@@ -21,6 +21,7 @@ set(STRINGLIST_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/stringlist.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/stringlist.h
 )
+
 set(DBUFFER_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/dbuffer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/dbuffer.h
@@ -29,6 +30,26 @@ set(DBUFFER_SOURCES
 set(DSPCOMMON_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/dspcommon.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/dspcommon.h
+)
+
+set(DSPALSA_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/dspalsa.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/dspalsa.h
+)
+
+set(DSPJACK_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/dspjack.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/dspjack.h
+)
+
+set(DSPMM_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/dspmm.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/dspmm.h
+)
+
+set(DSPNONE_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/dspnone.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/dspnone.h
 )
 
 add_library(misc
@@ -61,4 +82,48 @@ target_link_libraries(dspcommon
   dbuffer
   stringlist
   Threads::Threads
+)
+
+add_library(dspalsa
+  ${DSPALSA_SOURCES}
+)
+
+target_include_directories(dspalsa PRIVATE include)
+target_include_directories(dspalsa PUBLIC ${ALSA_INCLUDE_DIR})
+target_link_libraries(dspalsa
+  ${ALSA_LIBRARIES}
+  dspcommon
+  dbuffer
+)
+
+add_library(dspjack
+  ${DSPJACK_SOURCES}
+)
+
+target_include_directories(dspjack PRIVATE include)
+target_include_directories(dspjack PUBLIC ${JACK_INCLUDE_DIRS})
+target_link_libraries(dspjack
+  ${JACK_LIBRARIES}
+  dspcommon
+  dbuffer
+)
+
+add_library(dspmm
+  ${DSPMM_SOURCES}
+)
+
+target_include_directories(dspmm PRIVATE include)
+target_link_libraries(dspmm
+  dspcommon
+  dbuffer
+)
+
+add_library(dspnone
+  ${DSPNONE_SOURCES}
+)
+
+target_include_directories(dspnone PRIVATE include)
+target_link_libraries(dspnone
+  dspcommon
+  dbuffer
 )
