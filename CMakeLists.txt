@@ -4,6 +4,9 @@ project(qoscc
   VERSION 0.0.1
   LANGUAGES CXX)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 find_package(Threads REQUIRED)
@@ -50,6 +53,16 @@ set(DSPMM_SOURCES
 set(DSPNONE_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/dspnone.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/dspnone.h
+)
+
+set(CONTROLLERCLASS_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/controllerclass.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/controllerclass.h
+)
+
+set(DEVICECLASS_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/deviceclass.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/deviceclass.h
 )
 
 set(QOSCWINDOW_SOURCES
@@ -138,6 +151,19 @@ target_link_libraries(dspnone
   dspcommon
   dbuffer
 )
+
+add_library(controllerclass
+  ${CONTROLLERCLASS_SOURCES}
+  ${DEVICECLASS_SOURCES}
+)
+
+target_include_directories(controllerclass PRIVATE include)
+target_link_libraries(controllerclass
+  dspcommon
+  dbuffer
+  Threads::Threads
+)
+
 
 add_library(qoscwindow
             ${QOSCWINDOW_SOURCES}
