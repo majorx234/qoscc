@@ -6,8 +6,10 @@
 #include <mutex>
 #include <vector>
 
+
 #include "traceinterface.h"
 #include "scopeinterface.h"
+#include "controllerclass.h"
 
 class ScopeClass : public ScopeInterface 
 {
@@ -41,6 +43,8 @@ public:
 
   int removeTrace(TraceInterface *);
   int removeTrace(const std::string &);
+
+  double calcx(int, int); 
 
   int setTriggerSource(std::string);
   void recalc_stringrefs();
@@ -155,7 +159,8 @@ private:
 
   bool hold;
 
-  std::recursive_mutex mutex;
+  //std::recursive_mutex 
+  std::shared_mutex mutex;
 
   bool dispLog;
   bool dispDb;
@@ -171,7 +176,8 @@ private:
   double infoDC;
 
   double vDiv;
-  double dbMin, dbMax;  
+  double dbMin, dbMax;
+  globalClass *global;  
 };
 //todo better as enum
 // scope display modes:

@@ -65,6 +65,16 @@ set(DEVICECLASS_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/deviceclass.h
 )
 
+set(TRACECLASS_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/traceclass.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/traceclass.h
+)
+
+set(SCOPECLASS_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/scopeclass.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/scopeclass.h
+)
+
 set(QOSCWINDOW_SOURCES
     src/qoscwindow.cpp
     include/qoscwindow.h)
@@ -155,6 +165,8 @@ target_link_libraries(dspnone
 add_library(controllerclass
   ${CONTROLLERCLASS_SOURCES}
   ${DEVICECLASS_SOURCES}
+  ${TRACECLASS_SOURCES}
+  ${SCOPECLASS_SOURCES}
 )
 
 target_include_directories(controllerclass PRIVATE include)

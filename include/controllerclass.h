@@ -19,6 +19,8 @@ public:
     ~ControllerClass();
     ControllerClass(const ControllerClass&) = delete; // block copying!
 
+    globalClass* getGlobal();
+
     int addDevice(DeviceInterface *);
     int removeDevice(DeviceInterface *);  
 
