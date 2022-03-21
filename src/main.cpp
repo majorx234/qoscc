@@ -1,10 +1,10 @@
 #include <QtWidgets/QApplication>
-#include "qoscwindow.h"
+#include "qosccwindow.h"
  
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    QOscWindow w;
+    QOscCWindow w;
     w.show();
  
     return a.exec();

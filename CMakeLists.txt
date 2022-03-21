@@ -75,15 +75,15 @@ set(SCOPECLASS_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/scopeclass.h
 )
 
-set(QOSCWINDOW_SOURCES
-    src/qoscwindow.cpp
-    include/qoscwindow.h)
+set(QOSCCWINDOW_SOURCES
+    src/qosccwindow.cpp
+    include/qosccwindow.h)
 
 QT5_WRAP_UI(UISrcs 
-            ui/qoscwindow.ui)
+            ui/qosccwindow.ui)
 
-QT5_WRAP_CPP( QOSCWINDOW_MOCSOURCES
-  ${QOSCWINDOW_SOURCES}
+QT5_WRAP_CPP( QOSCCWINDOW_MOCSOURCES
+  ${QOSCCWINDOW_SOURCES}
 )
 
 add_library(misc
@@ -177,28 +177,28 @@ target_link_libraries(controllerclass
 )
 
 
-add_library(qoscwindow
-            ${QOSCWINDOW_SOURCES}
-            ${QOSCWINDOW_MOCSOURCES}
+add_library(qosccwindow
+            ${QOSCCWINDOW_SOURCES}
+            ${QOSCCWINDOW_MOCSOURCES}
             ${UISrcs}
             )
 
-target_include_directories(qoscwindow PRIVATE include)
-target_include_directories(qoscwindow PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-target_include_directories(qoscwindow SYSTEM
+target_include_directories(qosccwindow PRIVATE include)
+target_include_directories(qosccwindow PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(qosccwindow SYSTEM
   PUBLIC 
     ${Qt5Core_INCLUDE_DIRS}
     ${Qt5Widgets_INCLUDE_DIRS})
-target_link_libraries(qoscwindow PUBLIC 
+target_link_libraries(qosccwindow PUBLIC 
     ${JACK_LIBRARIES}
     Qt5::Core
     Qt5::Widgets)
 
-add_executable(qosc_test
+add_executable(qoscc_test
   src/main.cpp
 )
 
-target_include_directories(qosc_test PRIVATE include)
-target_link_libraries(qosc_test
-  qoscwindow 
+target_include_directories(qoscc_test PRIVATE include)
+target_link_libraries(qoscc_test
+  qosccwindow 
 )

@@ -1,21 +1,21 @@
-#ifndef QOSCWINDOW_H
-#define QOSCWINDOW_H
+#ifndef QOSCCWINDOW_H
+#define QOSCCWINDOW_H
 
 #include <QMainWindow>
 
 #define VERSION "0.41"
 
 namespace Ui {
-    class QOscWindow;
+    class QOscCWindow;
 }
 
-class QOscWindow : public QMainWindow
+class QOscCWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    explicit QOscWindow(QWidget *parent = 0);
-    ~QOscWindow();
+    explicit QOscCWindow(QWidget *parent = 0);
+    ~QOscCWindow();
 
  //   void initActions();    
  //   void initMenuBar();
@@ -48,6 +48,6 @@ private:
 
     std::string conffilename;
 private:
-    Ui::QOscWindow *ui;
+    Ui::QOscCWindow *ui;
 };      
-#endif // QOSCWINDOW_H
+#endif // QOSCCWINDOW_H

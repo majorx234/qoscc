@@ -3,12 +3,12 @@
 #include <QTabWidget>
 #include <QLabel>
 
-#include "qoscwindow.h"
-#include "ui_qoscwindow.h"
+#include "qosccwindow.h"
+#include "ui_qosccwindow.h"
 
-QOscWindow::QOscWindow(QWidget *parent) :
+QOscCWindow::QOscCWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::QOscWindow)
+    ui(new Ui::QOscCWindow)
 {
   ui->setupUi(this);
 
@@ -58,22 +58,22 @@ QOscWindow::QOscWindow(QWidget *parent) :
   statusBar()->addWidget(new QLabel(tr("Welcome to QOscC Version %1").arg(VERSION), this));
 }
 
-QOscWindow::~QOscWindow() {
+QOscCWindow::~QOscCWindow() {
   delete ui;
 }
 
-void QOscWindow::slotFileOpen()
+void QOscCWindow::slotFileOpen()
 {
      statusBar()->showMessage(tr("File Opened"),2000);
 }
 
-void QOscWindow::slotFileQuit() {
+void QOscCWindow::slotFileQuit() {
     // store configuration
 
     // then exit
     qApp->quit();
 }
 
-void QOscWindow::slotHelpAbout() {
+void QOscCWindow::slotHelpAbout() {
     QMessageBox::about(this, tr("About..."), tr("QOscC\nVersion %1\n(c) 2001 - 2005 by Sven Queisser\n 2017 by MajorX234").arg(VERSION) );
 }
