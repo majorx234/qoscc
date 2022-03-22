@@ -1,5 +1,18 @@
+//
+// C++ Implementation: globalClass.cpp
+//
+// Description:
+//
+//
+// Author: Sven Queisser, <tincan@svenqueisser.de, (C) 2001 - 2005
+//         MajorX234, <majorx234@gmail.com (C) 2022
+// Copyright: See COPYING file that comes with this distribution
+//
+//
+
 #include "controllerclass.h"
 
+#include <cstring>
 #include <stdio.h>
 #include <string>
 #include <cstring>
@@ -8,10 +21,14 @@
 #include <fftw3.h>
 #include <errno.h>
 #include <unistd.h>
+#include <iostream>
 
 #include "deviceclass.h"
-#include "traceclass.h"
 #include "scopeclass.h"
+#include "traceclass.h"
+#include "stringlist.h"
+#include "dspcommon.h"
+#include "dbuffer.h"
 
 ControllerClass::ControllerClass() {
     devnum = 0;
@@ -36,27 +53,27 @@ int ControllerClass::addDevice(DeviceInterface *newdev) {
     if(getDevice(newdev->getName()))
         return -1;
     {
-      std::lock_guard<std::shared_mutex> lock(rwMutex);
-      //    printf("ControllerClass::addDevice(%s): now have %d devices\n", newdev->getname(), devnum+1);
-      //    fflush(stdout);
-      DeviceInterface **newlist;  // create new, larger array
-      newlist = new DeviceInterface*[devnum + 1];
-      // copy over old devices
-      for(unsigned int i = 0; i < devnum; i++)
-      {
-        newlist[i] = devices[i];
-      }
-      // add new device at end
-      newlist[devnum] = newdev;
+        writeLock lock(rwMutex);
+        //    printf("ControllerClass::addDevice(%s): now have %d devices\n", newdev->getname(), devnum+1);
+        //    fflush(stdout);
+        DeviceInterface **newlist;  // create new, larger array
+        newlist = new DeviceInterface*[devnum + 1];
+        // copy over old devices
+        for(unsigned int i = 0; i < devnum; i++)
+        {
+            newlist[i] = devices[i];
+        }
+        // add new device at end
+        newlist[devnum] = newdev;
 
-      // delete old array if it existed
-      if (devnum){
-        delete [] devices;
-      }
-      // copy back new list
-      devices = newlist;
-      // increase number of devices
-      devnum ++;
+        // delete old array if it existed
+        if (devnum){
+            delete [] devices;
+        }
+        // copy back new list
+        devices = newlist;
+        // increase number of devices
+        devnum ++;
     }
     return 0;
 }
@@ -64,108 +81,99 @@ int ControllerClass::addDevice(DeviceInterface *newdev) {
 // removeDevice
 // removes specified class from array and clears memory
 int ControllerClass::removeDevice(DeviceInterface *devptr) {
-  // bail out if we got a zero pointer
-  if(!devptr || devnum < 1)
-  {
-    return -1;
-  }
-  {
-    std::lock_guard<std::shared_mutex> lock(rwMutex);
-    int removed = 0; // number of traces we removed ....
-    for(unsigned int i = 0; i < devnum; i++) {
-      if(devptr == devices[i]) {
-          removed ++;
-          //            delete devices[i];
-      } 
-      else
-      {
-          devices[i - removed] = devices[i];
-      }
+    // bail out if we got a zero pointer
+    if(!devptr || devnum < 1)
+    {
+      return -1;
     }
-    devnum -= removed;
-  }
-  return 0;
+    {
+        writeLock lock(rwMutex);
+        int removed = 0; // number of traces we removed ....
+        for(unsigned int i = 0; i < devnum; i++) {
+            if(devptr == devices[i]) {
+                removed ++;
+                //            delete devices[i];
+            } else {
+                devices[i - removed] = devices[i];
+            }
+        }
+        devnum -= removed;
+    }
+    return 0;
 }
 
 // DeviceInterface *getDevice(char*)
 // looks for device with name and returns its pointer
 // else it returns the NULL-pointer
 DeviceInterface *ControllerClass::getDevice(const std::string &name) {
-  {
-    std::shared_lock<std::shared_mutex> lock(rwMutex);
+    readLock lock(rwMutex);
     for(unsigned int i = 0; i < devnum; i++)
         if(name == devices[i]->getName()) {
-            //unlock();
             return devices[i];
         }
-    //unlock();
-    return NULL;
-  }
+    return nullptr;
 }
 
 // int addTrace(TraceInterface *)
 // adds new trace to global list
 int ControllerClass::addTrace(TraceInterface *newtrace) {
-  // bail out if trace name exists already
-  if(getTrace(newtrace->getName()))
-      return -1;
-  {
-    std::lock_guard<std::shared_mutex> lock(rwMutex);
-    //    printf("ControllerClass::addTrace(%s): now have %d traces\n", newtrace->getname(), tracenum+1);
-    //    fflush(stdout);
-    TraceInterface **newlist;  // create new, larger array
-    newlist = new TraceInterface*[tracenum + 1];
-    // copy over old traces
-    for(unsigned int i = 0; i < tracenum; i++)
-        newlist[i] = traces[i];
-    // add new device at end
-    newlist[tracenum] = newtrace;
+    // bail out if trace name exists already
+    if(getTrace(newtrace->getName()))
+        return -1;
+    {
+        readLock lock(rwMutex);
+        //    printf("ControllerClass::addTrace(%s): now have %d traces\n", newtrace->getname(), tracenum+1);
+        //    fflush(stdout);
+        TraceInterface **newlist;  // create new, larger array
+        newlist = new TraceInterface*[tracenum + 1];
+        // copy over old traces
+        for(unsigned int i = 0; i < tracenum; i++)
+            newlist[i] = traces[i];
+        // add new device at end
+        newlist[tracenum] = newtrace;
 
-    // delete old array if it existed
-    if(tracenum)
-        delete [] traces;
-    // copy back new list
-    traces = newlist;
-    // increase number of devices
-    tracenum ++;
-  }
-  return 0;
+        // delete old array if it existed
+        if(tracenum)
+            delete [] traces;
+        // copy back new list
+        traces = newlist;
+        // increase number of devices
+        tracenum ++;
+    }
+    return 0;
 }
 
 // int removeTrace(TraceInterface*)
 // removes trace identified by pointer from class
 int ControllerClass::removeTrace(TraceInterface *deltrace) {
-  // bail out if we got a zero pointer
-  if(!deltrace || tracenum < 1)
-      return -1;
-  {
-    std::lock_guard<std::shared_mutex> lock(rwMutex);
-    int removed = 0; // number of traces we removed ....
-    for(unsigned int i = 0; i < tracenum; i++) {
-        if(deltrace == traces[i]) {
-            removed ++;
-        } else
-            traces[i - removed] = traces[i];
+    // bail out if we got a zero pointer
+    if(!deltrace || tracenum < 1)
+        return -1;
+    {
+        writeLock lock(rwMutex);
+        int removed = 0; // number of traces we removed ....
+        for(unsigned int i = 0; i < tracenum; i++) {
+            if(deltrace == traces[i]) {
+                removed ++;
+            } else
+                traces[i - removed] = traces[i];
     }
 
-    tracenum -= removed;
-  }
-  return 0;
+        tracenum -= removed;
+    }
+    return 0;
 }
 
 // TraceInterface *getTrace(char*)
 // looks for trace with name and returns its pointer
 // else it returns the NULL-pointer
 TraceInterface *ControllerClass::getTrace(const std::string &name) {
-  {
-    std::shared_lock<std::shared_mutex> lock(rwMutex);
+    readLock lock(rwMutex);
     for(unsigned int i = 0; i < tracenum; i++)
         if(name == traces[i]->getName()) {
-            //unlock();
             return traces[i];
         }
-  }
-    return NULL;
+    return nullptr;
 }
 
 // int getTraceNum()
@@ -175,52 +183,51 @@ unsigned int ControllerClass::getTraceNum() {
 }
 
 int ControllerClass::addScope(ScopeInterface *newscope) {
-  // bail out if scope name exists already
-  if(getScope(newscope->getName()))
-      return -1;
-  {
-    std::lock_guard<std::shared_mutex> lock(rwMutex);
-    //    printf("ControllerClass::addScope(%s): now have %d scopes\n", newscope->getName().c_str(), scopenum+1);
-    //    fflush(stdout);
-    ScopeInterface **newlist;  // create new, larger array
-    newlist = new ScopeInterface*[scopenum + 1];
-    // copy over old scopes
-    for(unsigned int i = 0; i < scopenum; i++)
-        newlist[i] = scopes[i];
-    // add new scope at end
-    newlist[scopenum] = newscope;
+    // bail out if scope name exists already
+    if(getScope(newscope->getName()))
+        return -1;
+    {
+        writeLock lock(rwMutex);
+        //    printf("ControllerClass::addScope(%s): now have %d scopes\n", newscope->getName().c_str(), scopenum+1);
+        //    fflush(stdout);
+        ScopeInterface **newlist;  // create new, larger array
+        newlist = new ScopeInterface*[scopenum + 1];
+        // copy over old scopes
+        for(unsigned int i = 0; i < scopenum; i++)
+            newlist[i] = scopes[i];
+        // add new scope at end
+        newlist[scopenum] = newscope;
 
-    // delete old array if it existed
-    if(scopenum)
-        delete [] scopes;
-    // copy back new list
-    scopes = newlist;
-    // increase number of devices
-    scopenum ++;
-  }
-  return 0;
+        // delete old array if it existed
+        if(scopenum)
+            delete [] scopes;
+        // copy back new list
+        scopes = newlist;
+        // increase number of devices
+        scopenum ++;
+    }
+    return 0;
 }
 
 // int removeScope(ScopeInterface*)
 // removes Scope of given name
 int ControllerClass::removeScope(ScopeInterface *scope) {
-  // bail out if we got a zero pointer
-  if(!scope || scopenum < 1)
-      return -1;
-  {
-    std::lock_guard<std::shared_mutex> lock(rwMutex);
-    int removed = 0; // number of traces we removed ....
-    for(unsigned int i = 0; i < scopenum; i++) {
-        if(scope == scopes[i]) {
-            removed ++;
-            delete scopes[i];
-        } else
-            scopes[i - removed] = scopes[i];
+    // bail out if we got a zero pointer
+    if(!scope || scopenum < 1)
+        return -1;
+    {
+        writeLock lock(rwMutex);
+        int removed = 0; // number of traces we removed ....
+        for(unsigned int i = 0; i < scopenum; i++) {
+            if(scope == scopes[i]) {
+                removed ++;
+                delete scopes[i];
+            } else
+                scopes[i - removed] = scopes[i];
+        }
+        scopenum -= removed;
     }
-
-    scopenum -= removed;
-  }
-  return 0;
+    return 0;
 }
 
 // int removeScope(string)
@@ -231,18 +238,16 @@ int ControllerClass::removeScope(const std::string &name) {
 
 // scope *getScope(string)
 // returns pointer so scope of given name
-// returns NULL if none matches
+// returns nullptr if none matches
 ScopeInterface *ControllerClass::getScope(const std::string &name) {
-  {
-    std::shared_lock<std::shared_mutex> lock(rwMutex);
+    readLock lock(rwMutex);
     for(unsigned int i = 0; i < scopenum; i++)
     {  
-      if(name == scopes[i]->getName()) {
-        return scopes[i];
-      }
+        if(name == scopes[i]->getName()) {
+            return scopes[i];
+        }
     }
-  }
-  return NULL;
+    return nullptr;
 }
 
 // stringlist getDeviceList()
@@ -259,29 +264,25 @@ void ControllerClass::getDeviceList(stringlist *liste) {
 // stringlist getTraceList()
 // return list of Traces
 void ControllerClass::getTraceList(stringlist *liste) {
-  {
-    std::shared_lock<std::shared_mutex> lock(rwMutex);
+    readLock lock(rwMutex);
     // compose list...
     for(unsigned int i = 0; i < tracenum; i++)
-      liste->addString(traces[i]->getName());
-  }
+        liste->addString(traces[i]->getName());
 }
 
 // stringlist getScopeList()
 // return list of scope wins
 void ControllerClass::getScopeList(stringlist *liste) {
-  {
-    std::shared_lock<std::shared_mutex> lock(rwMutex);
+    readLock lock(rwMutex);
     // compose list...
     for(unsigned int i = 0; i < scopenum; i++)
-      liste->addString(scopes[i]->getName());
-  }
+        liste->addString(scopes[i]->getName());
 }
 
 
 int ControllerClass::readconfig(const std::string &file) {
     FILE *conffile;
-    char *confline = NULL;
+    char *confline = nullptr;
     size_t conflen = 0;
     int fstat;
 
@@ -292,7 +293,7 @@ int ControllerClass::readconfig(const std::string &file) {
 
     conffile = fopen(file.c_str(), "r");
     if(!conffile) {
-        fprintf(stderr, "\nreadconfig(): could not open config file %s! (%s)\n", file.c_str(), strerror(errno));
+        std::cerr << "\nreadconfig(): could not open config file" << file <<"! (" << errno << ")" << std::endl;
         return 1;
     }
 
@@ -310,7 +311,7 @@ int ControllerClass::readconfig(const std::string &file) {
             if(!strncmp("[dev]", confline, 5)) {
                 currdev = new DeviceClass(this);
                 if(!currdev) {
-                    fprintf(stderr, "readconfig: could not allocate memory (%s)\n", strerror(errno));
+                    std::cerr << "readconfig: could not allocate memory (" << errno << std::endl;
                     exit(-1);
                 }
                 addDevice(currdev);
@@ -318,7 +319,7 @@ int ControllerClass::readconfig(const std::string &file) {
             } else if(!strncmp("[trace]", confline, 7)) {
                 currtrace = new TraceClass(this);
                 if(!currtrace) {
-                    fprintf(stderr, "readconfig: could not allocate memory (%s)\n", strerror(errno));
+                    std::cerr << "readconfig: could not allocate memory (" << errno << ")" << std::endl;
                     exit(-1);
                 }
                 addTrace(currtrace);
@@ -326,7 +327,7 @@ int ControllerClass::readconfig(const std::string &file) {
             } else if(!strncmp("[scope]", confline, 8)) {
                 currscope = new ScopeClass(this);
                 if(!currscope) {
-                    fprintf(stderr, "readconfig: could not allocate memory (%s)\n", strerror(errno));
+                    std::cerr << "readconfig: could not allocate memory (" << errno << ")" << std::endl;
                     exit(-1);
                 }
                 addScope(currscope);
@@ -352,10 +353,10 @@ int ControllerClass::readconfig(const std::string &file) {
                     else if(!strncmp("mm", getsparam(confline), 4))
                         currdev->setDeviceType(PCM_MM);
                     else
-                        fprintf(stderr, "readconfig(): no such option for devicetype for %s\n", currdev->getName().c_str());
+                        std::cerr << "readconfig(): no such option for devicetype for " << currdev->getName() << std::endl;
                 } else if(!strncmp("dsp_size = ", confline, 11)) {
                     if(currdev->setDspSize(getiparam(confline)))
-                        fprintf(stderr, "readconfig(): invalid dsp_size for %s\n", currdev->getName().c_str());
+                        std::cerr << "readconfig(): invalid dsp_size for " << currdev->getName() << std::endl;
                 } else if(!strncmp("buffersize = ", confline, 13))
                     currdev->setBuffersize(getiparam(confline));
                 else if(!strncmp("adjust = ", confline, 9))
@@ -382,10 +383,10 @@ int ControllerClass::readconfig(const std::string &file) {
                     else if(!strncmp("false", getsparam(confline), 5))
                         currtrace->setPerfectBuffer(false);
                     else
-                        fprintf(stderr, "readconfig(): no such option for perfectbuffer: %s\n", getsparam(confline));
+                        std::cerr << "readconfig(): no such option for perfectbuffer: " << std::string(getsparam(confline)) << std::endl;
                 } else if(!strncmp("parent = ", confline, 9)) {
                     if(currtrace->setParentName(getsparam(confline))) {
-                        fprintf(stderr, "readconfig(): Unable to set parent name %s for trace %s\n", getsparam(confline), currtrace->getName().c_str());
+                        std::cerr << "readconfig(): Unable to set parent name " << std::string(getsparam(confline)) << " for trace " << currtrace->getName() << std::endl;
                         fflush(stderr);
                     }
                 } else if(!strncmp("fftwin = ", confline, 9)) {
@@ -440,7 +441,7 @@ int ControllerClass::readconfig(const std::string &file) {
                     currscope->setVDivs(getiparam(confline));
                 else if(!strncmp("trace = ", confline, 8)) {
                     if(currscope->addTrace(getTrace(getsparam(confline))))
-                        fprintf(stderr, "readconfig(): cannot add Trace %s\n", getsparam(confline));
+                        std::cerr << "readconfig(): cannot add Trace " << std::string(getsparam(confline)) << std::endl;
                 } else if(!strncmp("trigger_source = ", confline, 17))
                     currscope->setTriggerSource(getsparam(confline));
                 else if(!strncmp("trigger_level = ", confline, 16))
@@ -573,56 +574,50 @@ int ControllerClass::writeconfig(const std::string &filename) {
 }
 
 bool ControllerClass::hasTrace(TraceInterface *trace) {
-  {
-    std::shared_lock<std::shared_mutex> lock(rwMutex);
+    readLock lock(rwMutex);
     for(unsigned int i = 0; i < tracenum; i++) {
         if(traces[i] == trace) {
-            //unlock();
             return true;
         }
     }
-  }
-  return false;
+    return false;
 }
 
 // void quit
 void ControllerClass::quit() {
-  {
-    std::lock_guard<std::shared_mutex> lock(rwMutex);
-    // kill scope-redrawer thread
-    //    pthread_cancel(scope_thread);
-    //    pthread_join(scope_thread, NULL);
+    {
+        writeLock lock(rwMutex);
+        // kill scope-redrawer thread
+        //    pthread_cancel(scope_thread);
+        //    pthread_join(scope_thread, NULL);
 
-    // destroy traces, scopes and devices
-    for(unsigned int i = 0; i < scopenum; i++)
-        delete scopes[i];
-    scopenum = 0;
-  }
-
+        // destroy traces, scopes and devices
+        for(unsigned int i = 0; i < scopenum; i++)
+            delete scopes[i];
+        scopenum = 0;
+    }
     // only set read lock while stopping traces and devices
     // they also need to read from us, so we cannot
     // set a write lock
-  {
-    std::shared_lock<std::shared_mutex> lock(rwMutex);
-    for(unsigned int i = 0; i < devnum; i++)
-        devices[i]->stop();
-  }
-  {
-    std::lock_guard<std::shared_mutex> lock(rwMutex);
-    for(unsigned int i = 0; i < devnum; i++)
-        delete devices[i];
-    devnum = 0;
+    {
+        readLock lock(rwMutex);
+        for(unsigned int i = 0; i < devnum; i++)
+            devices[i]->stop();
+    }
+    {
+        writeLock lock(rwMutex);
+        for(unsigned int i = 0; i < devnum; i++)
+            delete devices[i];
+        devnum = 0;
 
-    for(unsigned int i = 0; i < tracenum; i++)
-        delete traces[i];
-    tracenum = 0;
-  }
+        for(unsigned int i = 0; i < tracenum; i++)
+            delete traces[i];
+        tracenum = 0;
+    }
 }
 
 void ControllerClass::notifyTraceUpdate(const std::string& devicename){
-  {
-    std::shared_lock<std::shared_mutex> lock(rwMutex);
+    readLock lock(rwMutex);
     for(unsigned int i = 0; i < scopenum; i++)
-      scopes[i]->notifyTraceUpdate(devicename);
-  }
+        scopes[i]->notifyTraceUpdate(devicename);
 }

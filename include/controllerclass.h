@@ -6,12 +6,15 @@
 #include <thread>
 #include <shared_mutex>
 
+#include "stringlist.h"
 #include "deviceinterface.h"
 #include "traceinterface.h"
 #include "scopeinterface.h"
 
 class ControllerClass
 {
+    typedef std::lock_guard<std::shared_mutex> writeLock;
+    typedef std::shared_lock<std::shared_mutex> readLock;  
 public:
     ControllerClass();
     ~ControllerClass();
