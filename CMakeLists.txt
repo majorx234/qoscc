@@ -77,11 +77,6 @@ set(SCOPECLASS_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/scopeclass.h
 )
 
-set(GLOBALCLASS_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/globalclass.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/globalclass.h
-)
-
 set(QOSCCWINDOW_SOURCES
     src/qosccwindow.cpp
     include/qosccwindow.h)
@@ -180,21 +175,10 @@ add_library(controllerclass
 
 target_include_directories(controllerclass PRIVATE include)
 target_link_libraries(controllerclass
+  stringlist
   dspcommon
   dbuffer
   dspnone
-  Threads::Threads
-)
-
-add_library(global
-  ${GLOBALCLASS_SOURCES}
-)
-
-target_include_directories(global PRIVATE include)
-
-target_link_libraries(global
-  stringlist
-  controllerclass
   Threads::Threads
 )
 
@@ -211,10 +195,11 @@ target_include_directories(qosccwindow SYSTEM
     ${Qt5Core_INCLUDE_DIRS}
     ${Qt5Widgets_INCLUDE_DIRS})
 target_link_libraries(qosccwindow PUBLIC
-    global 
     ${JACK_LIBRARIES}
     Qt5::Core
-    Qt5::Widgets)
+    Qt5::Widgets
+    controllerclass
+)
 
 add_executable(qoscc_test
   src/main.cpp
