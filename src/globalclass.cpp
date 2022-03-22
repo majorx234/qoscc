@@ -11,28 +11,27 @@
 //
 
 #include "globalclass.h"
-
+#include <cstring>
 #include <stdio.h>
-#include <pthread.h>
+#include <thread>
 #include <fftw3.h>
 #include <errno.h>
 #include <unistd.h>
+#include <iostream>
 
-#include "deviceClass.h"
-#include "scopeClass.h"
-#include "traceClass.h"
+#include "deviceclass.h"
+#include "scopeclass.h"
+#include "traceclass.h"
 #include "stringlist.h"
 #include "dspcommon.h"
 #include "dbuffer.h"
+
 
 globalClass::globalClass() {
     devnum = 0;
     tracenum = 0;
     scopenum = 0;
     delay = 40000; // that would be 25Hz at absolutely no load. good start value.
-
-    // init rw-lock
-    pthread_rwlock_init(&rwlock, NULL);
 }
 
 globalClass::~globalClass() {
@@ -42,138 +41,131 @@ globalClass::~globalClass() {
     // this produces a sigsegv, so leave it!
     //    fftw_cleanup();
     //    int err = pthread_mutex_destroy(&mutex);
-    int err = pthread_rwlock_destroy(&rwlock);
-    if(err) {
-        fprintf(stderr, "deviceClass::~deviceClass(): Mutex destroy failure (%s)\n", strerror(err));
-        fflush(stderr);
-    }
 }
 
 // addDevice
 // ads specified device to array
-int globalClass::addDevice(deviceClass *newdev) {
+int globalClass::addDevice(DeviceInterface *newdev) {
     // bail out if device exists already
     if(getDevice(newdev->getName()))
         return -1;
-    writeLock();
-    //    printf("globalClass::addDevice(%s): now have %d devices\n", newdev->getname(), devnum+1);
-    //    fflush(stdout);
-    deviceClass **newlist;  // create new, larger array
-    newlist = new deviceClass*[devnum + 1];
-    // copy over old devices
-    for(unsigned int i = 0; i < devnum; i++)
-        newlist[i] = devices[i];
-    // add new device at end
-    newlist[devnum] = newdev;
-
-    // delete old array if it existed
-    if(devnum)
-        delete [] devices;
-    // copy back new list
-    devices = newlist;
-    // increase number of devices
-    devnum ++;
-    unlock();
+    {
+        writeLock lock(rw_mtx);
+        //    printf("globalClass::addDevice(%s): now have %d devices\n", newdev->getname(), devnum+1);
+        //    fflush(stdout);
+        DeviceInterface **newlist;  // create new, larger array
+        newlist = new DeviceInterface*[devnum + 1];
+        // copy over old devices
+        for(unsigned int i = 0; i < devnum; i++)
+            newlist[i] = devices[i];
+        // add new device at end
+        newlist[devnum] = newdev;
+    
+        // delete old array if it existed
+        if(devnum)
+            delete [] devices;
+        // copy back new list
+        devices = newlist;
+        // increase number of devices
+        devnum ++;
+    }
     return 0;
 }
 
 // removeDevice
 // removes specified class from array and clears memory
-int globalClass::removeDevice(deviceClass *devptr) {
+int globalClass::removeDevice(DeviceInterface *devptr) {
     // bail out if we got a zero pointer
     if(!devptr || devnum < 1)
         return -1;
-    writeLock();
-    int removed = 0; // number of traces we removed ....
-    for(unsigned int i = 0; i < devnum; i++) {
-        if(devptr == devices[i]) {
-            removed ++;
-            //            delete devices[i];
-        } else
-            devices[i - removed] = devices[i];
+    {
+        writeLock lock(rw_mtx);
+        int removed = 0; // number of traces we removed ....
+        for(unsigned int i = 0; i < devnum; i++) {
+            if(devptr == devices[i]) {
+                removed ++;
+                //            delete devices[i];
+            } else
+                devices[i - removed] = devices[i];
+        }
+    
+        devnum -= removed;
     }
-
-    devnum -= removed;
-
-    unlock();
     return 0;
 }
 
-// deviceClass *getDevice(char*)
+// DeviceClass *getDevice(char*)
 // looks for device with name and returns its pointer
 // else it returns the NULL-pointer
-deviceClass *globalClass::getDevice(const std::string &name) {
-    readLock();
+DeviceInterface *globalClass::getDevice(const std::string &name) {
+    readLock lock(rw_mtx);
     for(unsigned int i = 0; i < devnum; i++)
         if(name == devices[i]->getName()) {
-            unlock();
             return devices[i];
         }
-    unlock();
-    return NULL;
+    return nullptr;
 }
 
 // int addTrace(traceClass *)
 // adds new trace to global list
-int globalClass::addTrace(traceClass *newtrace) {
+int globalClass::addTrace(TraceInterface *newtrace) {
     // bail out if trace name exists already
     if(getTrace(newtrace->getName()))
         return -1;
-    writeLock();
-    //    printf("globalClass::addTrace(%s): now have %d traces\n", newtrace->getname(), tracenum+1);
-    //    fflush(stdout);
-    traceClass **newlist;  // create new, larger array
-    newlist = new traceClass*[tracenum + 1];
-    // copy over old traces
-    for(unsigned int i = 0; i < tracenum; i++)
-        newlist[i] = traces[i];
-    // add new device at end
-    newlist[tracenum] = newtrace;
-
-    // delete old array if it existed
-    if(tracenum)
-        delete [] traces;
-    // copy back new list
-    traces = newlist;
-    // increase number of devices
-    tracenum ++;
-    unlock();
+    {
+        readLock lock(rw_mtx);
+        //    printf("globalClass::addTrace(%s): now have %d traces\n", newtrace->getname(), tracenum+1);
+        //    fflush(stdout);
+        TraceInterface **newlist;  // create new, larger array
+        newlist = new TraceInterface*[tracenum + 1];
+        // copy over old traces
+        for(unsigned int i = 0; i < tracenum; i++)
+            newlist[i] = traces[i];
+        // add new device at end
+        newlist[tracenum] = newtrace;
+    
+        // delete old array if it existed
+        if(tracenum)
+            delete [] traces;
+        // copy back new list
+        traces = newlist;
+        // increase number of devices
+        tracenum ++;
+    }    
     return 0;
 }
 
 // int removeTrace(traceClass*)
 // removes trace identified by pointer from class
-int globalClass::removeTrace(traceClass *deltrace) {
+int globalClass::removeTrace(TraceInterface *deltrace) {
     // bail out if we got a zero pointer
     if(!deltrace || tracenum < 1)
         return -1;
-    writeLock();
-    int removed = 0; // number of traces we removed ....
-    for(unsigned int i = 0; i < tracenum; i++) {
-        if(deltrace == traces[i]) {
-            removed ++;
-        } else
-            traces[i - removed] = traces[i];
+    {
+        writeLock lock(rw_mtx);
+        int removed = 0; // number of traces we removed ....
+        for(unsigned int i = 0; i < tracenum; i++) {
+            if(deltrace == traces[i]) {
+                removed ++;
+            } else
+                traces[i - removed] = traces[i];
+        }
+    
+        tracenum -= removed;
     }
-
-    tracenum -= removed;
-
-    unlock();
     return 0;
 }
 
 // traceClass *getTrace(char*)
 // looks for trace with name and returns its pointer
 // else it returns the NULL-pointer
-traceClass *globalClass::getTrace(const std::string &name) {
-    readLock();
+TraceInterface *globalClass::getTrace(const std::string &name) {
+    readLock lock(rw_mtx);
     for(unsigned int i = 0; i < tracenum; i++)
         if(name == traces[i]->getName()) {
-            unlock();
             return traces[i];
         }
-    unlock();
-    return NULL;
+    return nullptr;
 }
 
 // int getTraceNum()
@@ -182,73 +174,51 @@ unsigned int globalClass::getTraceNum() {
     return tracenum;
 }
 
-// void lock()
-// set mutex lock
-void globalClass::writeLock() {
-    //  pthread_mutex_lock(&mutex);
-    pthread_rwlock_wrlock(&rwlock);
-}
-
-// void lock()
-// set mutex lock
-void globalClass::readLock() {
-    //    pthread_mutex_lock(&mutex);
-    pthread_rwlock_rdlock(&rwlock);
-}
-
-// void unlock()
-// release mutex lock()
-void globalClass::unlock() {
-    //    pthread_mutex_unlock(&mutex);
-    pthread_rwlock_unlock(&rwlock);
-}
-
-int globalClass::addScope(scopeClass *newscope) {
+int globalClass::addScope(ScopeInterface *newscope) {
     // bail out if scope name exists already
     if(getScope(newscope->getName()))
         return -1;
-    writeLock();
-    //    printf("globalClass::addScope(%s): now have %d scopes\n", newscope->getName().c_str(), scopenum+1);
-    //    fflush(stdout);
-    scopeClass **newlist;  // create new, larger array
-    newlist = new scopeClass*[scopenum + 1];
-    // copy over old scopes
-    for(unsigned int i = 0; i < scopenum; i++)
-        newlist[i] = scopes[i];
-    // add new scope at end
-    newlist[scopenum] = newscope;
-
-    // delete old array if it existed
-    if(scopenum)
-        delete [] scopes;
-    // copy back new list
-    scopes = newlist;
-    // increase number of devices
-    scopenum ++;
-    unlock();
+    {
+        writeLock lock(rw_mtx);
+        //    printf("globalClass::addScope(%s): now have %d scopes\n", newscope->getName().c_str(), scopenum+1);
+        //    fflush(stdout);
+        ScopeInterface **newlist;  // create new, larger array
+        newlist = new ScopeInterface*[scopenum + 1];
+        // copy over old scopes
+        for(unsigned int i = 0; i < scopenum; i++)
+            newlist[i] = scopes[i];
+        // add new scope at end
+        newlist[scopenum] = newscope;
+    
+        // delete old array if it existed
+        if(scopenum)
+            delete [] scopes;
+        // copy back new list
+        scopes = newlist;
+        // increase number of devices
+        scopenum ++;
+    }
     return 0;
 }
 
 // int removeScope(scopeClass*)
 // removes Scope of given name
-int globalClass::removeScope(scopeClass *scope) {
+int globalClass::removeScope(ScopeInterface *scope) {
     // bail out if we got a zero pointer
     if(!scope || scopenum < 1)
         return -1;
-
-    writeLock();
-    int removed = 0; // number of traces we removed ....
-    for(unsigned int i = 0; i < scopenum; i++) {
-        if(scope == scopes[i]) {
-            removed ++;
-            delete scopes[i];
-        } else
-            scopes[i - removed] = scopes[i];
+    {
+        writeLock lock(rw_mtx);    
+        int removed = 0; // number of traces we removed ....
+        for(unsigned int i = 0; i < scopenum; i++) {
+            if(scope == scopes[i]) {
+                removed ++;
+                delete scopes[i];
+            } else
+                scopes[i - removed] = scopes[i];
+        }
+        scopenum -= removed;
     }
-
-    scopenum -= removed;
-
-    unlock();
     return 0;
 }
 
@@ -260,51 +230,46 @@ int globalClass::removeScope(const std::string &name) {
 
 // scope *getScope(string)
 // returns pointer so scope of given name
-// returns NULL if none matches
-scopeClass *globalClass::getScope(const std::string &name) {
-    readLock();
+// returns nullptr if none matches
+ScopeInterface *globalClass::getScope(const std::string &name) {
+    readLock lock(rw_mtx);
     for(unsigned int i = 0; i < scopenum; i++)
         if(name == scopes[i]->getName()) {
-            unlock();
             return scopes[i];
         }
-    unlock();
-    return NULL;
+    return nullptr;
 }
 
 // stringlist getDeviceList()
 // return list of devices
 void globalClass::getDeviceList(stringlist *liste) {
-    readLock();
+    readLock lock(rw_mtx);
     // compose list...
     for(unsigned int i = 0; i < devnum; i++)
         liste->addString(devices[i]->getName());
-    unlock();
 }
 
 // stringlist getTraceList()
 // return list of Traces
 void globalClass::getTraceList(stringlist *liste) {
-    readLock();
+    readLock lock(rw_mtx);
     // compose list...
     for(unsigned int i = 0; i < tracenum; i++)
         liste->addString(traces[i]->getName());
-    unlock();
 }
 
 // stringlist getScopeList()
 // return list of scope wins
 void globalClass::getScopeList(stringlist *liste) {
-    readLock();
+    readLock lock(rw_mtx);
     // compose list...
     for(unsigned int i = 0; i < scopenum; i++)
         liste->addString(scopes[i]->getName());
-    unlock();
 }
 
 int globalClass::readconfig(const std::string &file) {
     FILE *conffile;
-    char *confline = NULL;
+    char *confline = nullptr;
     size_t conflen = 0;
     int fstat;
 
@@ -315,13 +280,13 @@ int globalClass::readconfig(const std::string &file) {
 
     conffile = fopen(file.c_str(), "r");
     if(!conffile) {
-        fprintf(stderr, "\nreadconfig(): could not open config file %s! (%s)\n", file.c_str(), strerror(errno));
+        std::cerr << "\nreadconfig(): could not open config file" << file <<"! (" << errno << ")" << std::endl;
         return 1;
     }
 
-    traceClass *currtrace; // pointers for current device / trace / scope
-    deviceClass *currdev;
-    scopeClass *currscope;
+    TraceClass *currtrace; // pointers for current device / trace / scope
+    DeviceClass *currdev;
+    ScopeClass *currscope;
 
     // read configfile, transfer parameters to structs
     do {
@@ -331,28 +296,28 @@ int globalClass::readconfig(const std::string &file) {
             //            printf("%s\n", confline);
             //            fflush(stdout);
             if(!strncmp("[dev]", confline, 5)) {
-                currdev = new deviceClass;
+                currdev = new DeviceClass(nullptr);
                 if(!currdev) {
-                    fprintf(stderr, "readconfig: could not allocate memory (%s)\n", strerror(errno));
+                    std::cerr << "readconfig: could not allocate memory (" << errno << std::endl;
                     exit(-1);
                 }
-                global->addDevice(currdev);
+                addDevice(currdev);
                 conftype = C_DEV;
             } else if(!strncmp("[trace]", confline, 7)) {
-                currtrace = new traceClass;
+                currtrace = new TraceClass(nullptr);
                 if(!currtrace) {
-                    fprintf(stderr, "readconfig: could not allocate memory (%s)\n", strerror(errno));
+                    std::cerr << "readconfig: could not allocate memory (" << errno << ")" << std::endl;
                     exit(-1);
                 }
-                global->addTrace(currtrace);
+                addTrace(currtrace);
                 conftype = C_TRACE;
             } else if(!strncmp("[scope]", confline, 8)) {
-                currscope = new scopeClass;
+                currscope = new ScopeClass(nullptr);
                 if(!currscope) {
-                    fprintf(stderr, "readconfig: could not allocate memory (%s)\n", strerror(errno));
+                    std::cerr << "readconfig: could not allocate memory (" << errno << ")" << std::endl;
                     exit(-1);
                 }
-                global->addScope(currscope);
+                addScope(currscope);
                 conftype = C_SCOPE;
             } else if(conftype == C_DEV) {
                 if(!strncmp("name = ", confline, 7))
@@ -375,10 +340,10 @@ int globalClass::readconfig(const std::string &file) {
                     else if(!strncmp("mm", getsparam(confline), 4))
                         currdev->setDeviceType(PCM_MM);
                     else
-                        fprintf(stderr, "readconfig(): no such option for devicetype for %s\n", currdev->getName().c_str());
+                        std::cerr << "readconfig(): no such option for devicetype for " << currdev->getName() << std::endl;
                 } else if(!strncmp("dsp_size = ", confline, 11)) {
                     if(currdev->setDspSize(getiparam(confline)))
-                        fprintf(stderr, "readconfig(): invalid dsp_size for %s\n", currdev->getName().c_str());
+                        std::cerr << "readconfig(): invalid dsp_size for " << currdev->getName() << std::endl;
                 } else if(!strncmp("buffersize = ", confline, 13))
                     currdev->setBuffersize(getiparam(confline));
                 else if(!strncmp("adjust = ", confline, 9))
@@ -405,10 +370,10 @@ int globalClass::readconfig(const std::string &file) {
                     else if(!strncmp("false", getsparam(confline), 5))
                         currtrace->setPerfectBuffer(false);
                     else
-                        fprintf(stderr, "readconfig(): no such option for perfectbuffer: %s\n", getsparam(confline));
+                        std::cerr << "readconfig(): no such option for perfectbuffer: " << std::string(getsparam(confline)) << std::endl;
                 } else if(!strncmp("parent = ", confline, 9)) {
                     if(currtrace->setParentName(getsparam(confline))) {
-                        fprintf(stderr, "readconfig(): Unable to set parent name %s for trace %s\n", getsparam(confline), currtrace->getName().c_str());
+                        std::cerr << "readconfig(): Unable to set parent name " << std::string(getsparam(confline)) << " for trace " << currtrace->getName() << std::endl;
                         fflush(stderr);
                     }
                 } else if(!strncmp("fftwin = ", confline, 9)) {
@@ -462,8 +427,8 @@ int globalClass::readconfig(const std::string &file) {
                 else if(!strncmp("vdivs = ", confline, 8))
                     currscope->setVDivs(getiparam(confline));
                 else if(!strncmp("trace = ", confline, 8)) {
-                    if(currscope->addTrace(global->getTrace(getsparam(confline))))
-                        fprintf(stderr, "readconfig(): cannot add Trace %s\n", getsparam(confline));
+                    if(currscope->addTrace(getTrace(getsparam(confline))))
+                        std::cerr << "readconfig(): cannot add Trace " << std::string(getsparam(confline)) << std::endl;
                 } else if(!strncmp("trigger_source = ", confline, 17))
                     currscope->setTriggerSource(getsparam(confline));
                 else if(!strncmp("trigger_level = ", confline, 16))
@@ -568,81 +533,79 @@ int globalClass::writeconfig(const std::string &filename) {
 
     file = fopen(filename.c_str(), "w");
     if(!file) {
-        fprintf(stderr, "writeconfig(): Could not open file %s (%s)\n", filename.c_str(), strerror(errno));
+        std::cerr << "writeconfig(): Could not open file " << filename << " (" << errno << ")" << std::endl;
         return -1;
     }
 
     // print out devices
-    for(i = 0; i < global->devnum; i++) {
+    for(i = 0; i < devnum; i++) {
         fprintf(file, "[dev]\n");
-        global->devices[i]->dump(file);
+        devices[i]->dump(file);
         fprintf(file, "\n");
     }
 
     // print out traces
-    for(i = 0; i < global->tracenum; i++) {
+    for(i = 0; i < tracenum; i++) {
         fprintf(file, "[trace]\n");
-        global->traces[i]->dump(file);
+        traces[i]->dump(file);
         fprintf(file, "\n");
     }
 
     // print out scope sections
-    for(i = 0; i < global->scopenum; i++) {
+    for(i = 0; i < scopenum; i++) {
         fprintf(file, "[scope]\n");
-        global->scopes[i]->dump(file);
+        scopes[i]->dump(file);
         fprintf(file, "\n");
     }
     return 0;
 }
 
-bool globalClass::hasTrace(traceClass *trace) {
-    readLock();
+bool globalClass::hasTrace(TraceInterface *trace) {
+    readLock lock(rw_mtx);
     for(unsigned int i = 0; i < tracenum; i++) {
         if(traces[i] == trace) {
-            unlock();
             return true;
         }
     }
-    unlock();
     return false;
 }
 
 // void quit
 void globalClass::quit() {
-    writeLock();
-    // kill scope-redrawer thread
-    //    pthread_cancel(scope_thread);
-    //    pthread_join(scope_thread, NULL);
-
-    // destroy traces, scopes and devices
-    for(unsigned int i = 0; i < scopenum; i++)
-        delete scopes[i];
-    scopenum = 0;
-    unlock();
-
+    {
+        writeLock lock(rw_mtx);
+        // kill scope-redrawer thread
+        //    pthread_cancel(scope_thread);
+        //    pthread_join(scope_thread, nullptr);
+    
+        // destroy traces, scopes and devices
+        for(unsigned int i = 0; i < scopenum; i++)
+            delete scopes[i];
+        scopenum = 0;
+    }
     // only set read lock while stopping traces and devices
     // they also need to read from us, so we cannot
     // set a write lock
-    readLock();
-    for(unsigned int i = 0; i < devnum; i++)
-        devices[i]->stop();
-    unlock();
+    {
+        readLock lock(rw_mtx);
+        for(unsigned int i = 0; i < devnum; i++)
+            devices[i]->stop();
+    }
 
-    writeLock();
-    for(unsigned int i = 0; i < devnum; i++)
-        delete devices[i];
-    devnum = 0;
-
-    for(unsigned int i = 0; i < tracenum; i++)
-        delete traces[i];
-    tracenum = 0;
-
-    unlock();
+    {
+        writeLock lock(rw_mtx);
+        for(unsigned int i = 0; i < devnum; i++)
+            delete devices[i];
+        devnum = 0;
+    
+        for(unsigned int i = 0; i < tracenum; i++)
+            delete traces[i];
+        tracenum = 0;
+    }
 }
 
 void globalClass::notifyTraceUpdate(const std::string& devicename){
-    readLock();
+    readLock lock(rw_mtx);
     for(unsigned int i = 0; i < scopenum; i++)
 	scopes[i]->notifyTraceUpdate(devicename);
-    unlock();
 }

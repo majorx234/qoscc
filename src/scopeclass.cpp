@@ -18,7 +18,7 @@
 
 ScopeClass::ScopeClass(ControllerClass* _parentController) : parentController(_parentController) 
 {
-    global = _parentController->getGlobal();
+    //global = _parentController->getGlobal(); //toFix not needed parent controller should be used
     initVars();
 }
 
@@ -83,7 +83,7 @@ std::string ScopeClass::getName() {
 // int setName(string)
 // sets the name of this scope
 int ScopeClass::setName(const std::string &newname) {
-    if(global->getScope(newname))
+    if(parentController->getScope(newname))
         return -1;
     {
         std::lock_guard<std::shared_mutex> lock(mutex);
@@ -199,6 +199,35 @@ unsigned int ScopeClass::getTraceNum() {
     return tracenum;
 }
 
+// void setHeight(int newheight)
+// sets the new window height
+void ScopeClass::setHeight(int newheight) {
+    // ToDo notify View    
+    //setGeometry(x(), y(), width(), newheight);
+}
+
+// void setWidth(int newwidth)
+// sets the new window width
+void ScopeClass::setWidth(int newwidth) {
+
+    // ToDo notify View    
+    //setGeometry(x(), y(), newwidth, height());
+}
+
+// void setXPos(int x)
+// sets the new position of the window
+void ScopeClass::setXPos(int x) {
+    // ToDo notify View    
+    //setGeometry(x, y(), width(), height());
+}
+
+// void setYPos(int y)
+// sets the new position of the window
+void ScopeClass::setYPos(int y) {
+    // ToDo notify View    
+    //setGeometry(x(), y, width(), height());
+}
+
 // traceClass *getTrace(char*)
 // looks for trace with name and returns its pointer
 // else it returns the NULL-pointer
@@ -248,14 +277,14 @@ int ScopeClass::removeTrace(TraceInterface *trace) {
 // int removeTrace(string)
 // remove trace of specified name
 int ScopeClass::removeTrace(const std::string &tracename) {
-    return removeTrace(global->getTrace(tracename));
+    return removeTrace(parentController->getTrace(tracename));
 }
 
 
 // int setTriggerSource(string)
 // check and set new trigger source
 int ScopeClass::setTriggerSource(std::string newname) {
-    TraceInterface *newsource = global->getTrace(newname.c_str());
+    TraceInterface *newsource = parentController->getTrace(newname.c_str());
     if(!newsource) {  // trace not found
         return -1;
     }
@@ -272,12 +301,12 @@ int ScopeClass::setTriggerSource(std::string newname) {
 void ScopeClass::recalc_stringrefs() {
     std::lock_guard<std::shared_mutex> lock(mutex);
     // trigger source:
-    if(global->hasTrace(trigger_source))
+    if(parentController->hasTrace(trigger_source))
         trigger_source_name = trigger_source->getName();
     // xy sources:
-    if(global->hasTrace(xysource_x))
+    if(parentController->hasTrace(xysource_x))
         xysource_x_name = xysource_x->getName();
-    if(global->hasTrace(xysource_y))
+    if(parentController->hasTrace(xysource_y))
         xysource_y_name = xysource_y->getName();
 }
 
@@ -519,7 +548,7 @@ void ScopeClass::setDispFMax(unsigned int n) {
 void ScopeClass::setInfoTraceName(const std::string& newname) {
     std::lock_guard<std::shared_mutex> lock(mutex);
     // check if trace exists
-    if(global->getTrace(newname))
+    if(parentController->getTrace(newname))
         infoTraceName = newname;
 }
 
@@ -616,3 +645,24 @@ void ScopeClass::removeObserver(const ScopeObserver* delObserver){
 void ScopeClass::notifyObserver(){
 
 } 
+
+void ScopeClass::setFont(const std::string& newfont) {
+    std::lock_guard<std::shared_mutex> lock(mutex);
+    font = newfont;
+}
+
+void ScopeClass::notifyTraceUpdate(const std::string& devicename) {
+    // we can discard the notify if we are in hold mode.
+    if(hold)
+        return;
+
+    std::shared_lock<std::shared_mutex> lock(mutex);
+    {
+        for(unsigned int i = 0; i < tracenum; i++)
+            if(devicename == traces[i]->getParentName()) {
+                // ToDo notify View
+                //triggerRedrawScope();
+                break;
+            }
+    }
+}

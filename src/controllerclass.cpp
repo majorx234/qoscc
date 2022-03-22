@@ -18,14 +18,12 @@ ControllerClass::ControllerClass() {
     tracenum = 0;
     scopenum = 0;
     delay = 40000; // that would be 25Hz at absolutely no load. good start value.
-    global = new globalClass();
 }
 
 ControllerClass::~ControllerClass() {
     delete [] traces;
     delete [] devices;
     delete [] scopes;
-    delete global;
     // this produces a sigsegv, so leave it!
     //    fftw_cleanup();
 
@@ -315,7 +313,7 @@ int ControllerClass::readconfig(const std::string &file) {
                     fprintf(stderr, "readconfig: could not allocate memory (%s)\n", strerror(errno));
                     exit(-1);
                 }
-                global->addDevice(currdev);
+                addDevice(currdev);
                 conftype = C_DEV;
             } else if(!strncmp("[trace]", confline, 7)) {
                 currtrace = new TraceClass(this);
@@ -323,7 +321,7 @@ int ControllerClass::readconfig(const std::string &file) {
                     fprintf(stderr, "readconfig: could not allocate memory (%s)\n", strerror(errno));
                     exit(-1);
                 }
-                global->addTrace(currtrace);
+                addTrace(currtrace);
                 conftype = C_TRACE;
             } else if(!strncmp("[scope]", confline, 8)) {
                 currscope = new ScopeClass(this);
@@ -331,7 +329,7 @@ int ControllerClass::readconfig(const std::string &file) {
                     fprintf(stderr, "readconfig: could not allocate memory (%s)\n", strerror(errno));
                     exit(-1);
                 }
-                global->addScope(currscope);
+                addScope(currscope);
                 conftype = C_SCOPE;
             } else if(conftype == C_DEV) {
                 if(!strncmp("name = ", confline, 7))
@@ -441,7 +439,7 @@ int ControllerClass::readconfig(const std::string &file) {
                 else if(!strncmp("vdivs = ", confline, 8))
                     currscope->setVDivs(getiparam(confline));
                 else if(!strncmp("trace = ", confline, 8)) {
-                    if(currscope->addTrace(global->getTrace(getsparam(confline))))
+                    if(currscope->addTrace(getTrace(getsparam(confline))))
                         fprintf(stderr, "readconfig(): cannot add Trace %s\n", getsparam(confline));
                 } else if(!strncmp("trigger_source = ", confline, 17))
                     currscope->setTriggerSource(getsparam(confline));
@@ -552,23 +550,23 @@ int ControllerClass::writeconfig(const std::string &filename) {
     }
 
     // print out devices
-    for(i = 0; i < global->devnum; i++) {
+    for(i = 0; i < devnum; i++) {
         fprintf(file, "[dev]\n");
-        global->devices[i]->dump(file);
+        devices[i]->dump(file);
         fprintf(file, "\n");
     }
 
     // print out traces
-    for(i = 0; i < global->tracenum; i++) {
+    for(i = 0; i < tracenum; i++) {
         fprintf(file, "[trace]\n");
-        global->traces[i]->dump(file);
+        traces[i]->dump(file);
         fprintf(file, "\n");
     }
 
     // print out scope sections
-    for(i = 0; i < global->scopenum; i++) {
+    for(i = 0; i < scopenum; i++) {
         fprintf(file, "[scope]\n");
-        global->scopes[i]->dump(file);
+        scopes[i]->dump(file);
         fprintf(file, "\n");
     }
     return 0;

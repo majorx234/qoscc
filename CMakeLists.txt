@@ -14,6 +14,8 @@ find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Core REQUIRED)
 find_package(ALSA REQUIRED)
 find_package(Jack REQUIRED)
+find_package(PkgConfig)
+pkg_check_modules(FFTW3 REQUIRED fftw3)
 
 set(MISC_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/misc.cpp
@@ -75,6 +77,11 @@ set(SCOPECLASS_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/scopeclass.h
 )
 
+set(GLOBALCLASS_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/globalclass.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/globalclass.h
+)
+
 set(QOSCCWINDOW_SOURCES
     src/qosccwindow.cpp
     include/qosccwindow.h)
@@ -103,8 +110,10 @@ add_library(dbuffer
 )
 
 target_include_directories(dbuffer PRIVATE include)
+target_include_directories(dbuffer PUBLIC ${FFTW3_INCLUDE_DIRS})
 target_link_libraries(dbuffer
   misc 
+  ${FFTW3_LIBRARIES}
 )
 
 add_library(dspcommon
@@ -173,9 +182,21 @@ target_include_directories(controllerclass PRIVATE include)
 target_link_libraries(controllerclass
   dspcommon
   dbuffer
+  dspnone
   Threads::Threads
 )
 
+add_library(global
+  ${GLOBALCLASS_SOURCES}
+)
+
+target_include_directories(global PRIVATE include)
+
+target_link_libraries(global
+  stringlist
+  controllerclass
+  Threads::Threads
+)
 
 add_library(qosccwindow
             ${QOSCCWINDOW_SOURCES}
@@ -189,7 +210,8 @@ target_include_directories(qosccwindow SYSTEM
   PUBLIC 
     ${Qt5Core_INCLUDE_DIRS}
     ${Qt5Widgets_INCLUDE_DIRS})
-target_link_libraries(qosccwindow PUBLIC 
+target_link_libraries(qosccwindow PUBLIC
+    global 
     ${JACK_LIBRARIES}
     Qt5::Core
     Qt5::Widgets)

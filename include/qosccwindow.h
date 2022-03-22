@@ -2,6 +2,7 @@
 #define QOSCCWINDOW_H
 
 #include <QMainWindow>
+#include "controllerclass.h"
 
 #define VERSION "0.41"
 
@@ -19,14 +20,13 @@ public:
 
  //   void initActions();    
  //   void initMenuBar();
-
+    ControllerClass* controller;
 public slots:  
     void slotFileOpen();  
     void slotFileQuit();
     void slotHelpAbout();
 //    void slotSaveSettings();
 //    void update();
-
 signals:
     void hasChanged();   
 private:

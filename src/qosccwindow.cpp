@@ -11,10 +11,16 @@ QOscCWindow::QOscCWindow(QWidget *parent) :
     ui(new Ui::QOscCWindow)
 {
   ui->setupUi(this);
-
+  controller = new ControllerClass();
   // read configuration
   conffilename = std::string(getenv("HOME")) + "/.qosccrc";
-
+  if(controller->readconfig(conffilename)) {
+    QMessageBox::information(this, 
+                             tr("QOscC -- No configuration file found"),
+                             tr("No configuration file (%1) has been found. I'll use default settings.\n" 
+                                "You first have to add at least a trace, a scope and a device and configure "
+                                "them to your needs.").arg(QString::fromUtf8(conffilename.c_str())));
+  }
   setWindowTitle("QOscC " VERSION);
   groups = new QTabWidget(this);
   setCentralWidget(groups);

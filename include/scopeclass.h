@@ -86,7 +86,7 @@ public:
   /* FIXME needs qfont */
   std::string getFont(){
    // return font.toString();
-    return "none";
+    return font;
   }
 
   void setMode(int);
@@ -177,7 +177,8 @@ private:
 
   double vDiv;
   double dbMin, dbMax;
-  globalClass *global;  
+
+  std::string font;
 };
 //todo better as enum
 // scope display modes:

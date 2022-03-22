@@ -10,16 +10,12 @@
 #include "traceinterface.h"
 #include "scopeinterface.h"
 
-#include "globalclass.h"
-
 class ControllerClass
 {
 public:
     ControllerClass();
     ~ControllerClass();
     ControllerClass(const ControllerClass&) = delete; // block copying!
-
-    globalClass* getGlobal();
 
     int addDevice(DeviceInterface *);
     int removeDevice(DeviceInterface *);  
@@ -66,7 +62,6 @@ private:
   float getfparam(char *);
 
   unsigned long delay;  
-  globalClass *global;
 };
 
 #endif // CONTROLLER_CLASS_H

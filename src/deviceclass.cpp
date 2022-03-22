@@ -15,9 +15,6 @@
 #include "qoscc.h"
 */
 #include "misc.h"
-#include "globalclass.h"
-
-
 
 #include "traceinterface.h"
 //#include "scopeinterface.h"

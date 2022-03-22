@@ -195,6 +195,13 @@ unsigned int TraceClass::getBufferSize() {
     return buffersize;
 }
 
+void TraceClass::setYZoom(double newzoom) {
+  { //write lock
+    std::lock_guard<std::shared_mutex> lock(rwMutex);
+    // ToDo: implement zoom
+  }
+}
+
 void TraceClass::setXShift(double newshift) {
   { //write lock
     std::lock_guard<std::shared_mutex> lock(rwMutex);

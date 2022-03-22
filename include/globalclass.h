@@ -12,8 +12,9 @@
 #ifndef GLOBALCLASS_H
 #define GLOBALCLASS_H
 
-#include <thread>
 #include <string>
+#include <thread>
+#include <shared_mutex>
 
 #include "stringlist.h"
 #include "deviceinterface.h"
@@ -21,6 +22,8 @@
 #include "scopeinterface.h"
 
 class globalClass {
+    typedef std::lock_guard<std::shared_mutex> writeLock;
+    typedef std::shared_lock<std::shared_mutex> readLock;
 public:
     globalClass();
     ~globalClass();
@@ -40,10 +43,6 @@ public:
     ScopeInterface *getScope(const std::string &);
 
     unsigned int getTraceNum();
-
-    void writeLock();
-    void readLock();
-    void unlock();
 
     void getDeviceList(stringlist *);
     void getTraceList(stringlist *);
@@ -67,7 +66,7 @@ private:
     globalClass(const globalClass&){}; // block copying!
 
     std::thread scope_thread;        // thread handler for scope
-    pthread_rwlock_t rwlock;
+    std::shared_mutex rw_mtx;     // shared mutex or read/write
 
     int getiparam(char *);
     char *getsparam(char *);
