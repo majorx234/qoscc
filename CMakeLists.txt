@@ -77,6 +77,11 @@ set(SCOPECLASS_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/scopeclass.h
 )
 
+set(SCOPECONTROL_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/scopecontrol.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/scopecontrol.h
+)
+
 set(QOSCCWINDOW_SOURCES
     src/qosccwindow.cpp
     include/qosccwindow.h)
@@ -86,6 +91,10 @@ QT5_WRAP_UI(UISrcs
 
 QT5_WRAP_CPP( QOSCCWINDOW_MOCSOURCES
   ${QOSCCWINDOW_SOURCES}
+)
+
+QT5_WRAP_CPP( SCOPECONTROL_MOCSOURCES
+  ${SCOPECONROL_SOURCES}
 )
 
 add_library(misc
@@ -180,6 +189,23 @@ target_link_libraries(controllerclass
   dbuffer
   dspnone
   Threads::Threads
+)
+
+add_library(scopecontrol
+            ${SCOPECONTROL_SOURCES}
+            ${SCOPECONTROL_MOCSOURCES}
+)
+target_include_directories(scopecontrol PRIVATE include)
+target_include_directories(scopecontrol PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(scopecontrol SYSTEM
+  PUBLIC 
+    ${Qt5Core_INCLUDE_DIRS}
+    ${Qt5Widgets_INCLUDE_DIRS})
+target_link_libraries(scopecontrol PUBLIC
+    Qt5::Core
+    Qt5::Widgets
+    controllerclass
+    scopeclass
 )
 
 add_library(qosccwindow
