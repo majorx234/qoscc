@@ -11,6 +11,7 @@
 //
 //
 
+#include <string>
 #include "scopecontrol.h"
 
 #include <QCheckBox>
@@ -41,7 +42,10 @@
 #include "misc.h"
 //#include "datastore.h"
 
-ScopeControl::ScopeControl(ScopeClass *scope, QTabWidget *parent, const char *name) : QGroupBox(QString(name),parent) {
+ScopeControl::ScopeControl(ScopeClass *scope,ControllerClass* parentController, QTabWidget *parent, const char *name) 
+  : QGroupBox(QString(name),parent)
+  ,_parentController(parentController)
+{
     thisscope = scope;
 
     miscOptsMenu = new QMenu("scopeMiscOptsMenu",this);
@@ -108,3 +112,427 @@ ScopeControl::ScopeControl(ScopeClass *scope, QTabWidget *parent, const char *na
 }
 
 ScopeControl::~ScopeControl() {}
+
+void ScopeControl::setColGrid() {
+    QColor col;
+    col = QColorDialog::getColor(QString::fromStdString(thisscope->getGridCol()));
+    if(col.isValid())
+        thisscope->setGridCol(col.name().toStdString());
+}
+
+void ScopeControl::setColMark() {
+    QColor col;
+    col = QColorDialog::getColor(QString::fromStdString(thisscope->getMarkCol()));
+    if(col.isValid())
+        thisscope->setMarkCol(col.name().toStdString());
+}
+
+void ScopeControl::setColBg() {
+    QColor col;
+    col = QColorDialog::getColor(QString::fromStdString(thisscope->getBCol()));
+    if(col.isValid())
+        thisscope->setBCol(col.name().toStdString());
+}
+
+void ScopeControl::setColText() {
+    QColor col;
+    col = QColorDialog::getColor(QString::fromStdString(thisscope->getTextCol()));
+    if(col.isValid())
+        thisscope->setTextCol(col.name().toStdString());
+}
+
+void ScopeControl::updateLocal() {
+    updateTraceList();
+    updateTitle();
+    updateSweep();
+    updateBoxSweep();
+    updateMode();
+    updateTLevel();
+    updateTEdge();
+    updateTriggerSource();
+    updateTrigger();
+    updateXYSource();
+    updateDispLog();
+    updateDispFMin();
+    updateDispFMax();
+    updateInfoTrace();
+    updateDispDb();
+    updateDispDbRef();
+    updateDispDbMin();
+    updateDispDbMax();
+    updateBoxFRange();
+    updateBoxDbRange();
+    updateBoxScaling();
+    updateVDiv();
+    updateBoxVDiv();
+}
+
+void ScopeControl::update() {
+    thisscope->recalc_stringrefs();
+    updateLocal();
+}
+
+// void updateTraceList()
+// re-read trace list and fill to traceListBox
+void ScopeControl::updateTraceList() {
+    unsigned int i;
+    stringlist liste;
+    // clear list:
+    tracelist->clear();
+
+    _parentController->getTraceList(&liste);
+
+    // add all from scopes list
+    for(i = 0; i < liste.count(); i++) {
+        tracelist->addItem(QString::fromStdString(liste.getString(i)));
+        // check if this trace is in this scope...
+        if(thisscope->getTrace(liste.getString(i)))
+            tracelist->setCurrentRow(i); // set selected item true
+    }
+}
+
+// void setTraceList()
+// sets the trace list(thisscope->traces) to the selection of the tracelist widget
+void ScopeControl::setTraceList() {
+    for(unsigned int i = 0; i < tracelist->count(); i++) {
+        TraceInterface *trace = _parentController->getTrace(tracelist->item(i)->text().toStdString());
+        if(!trace) {  // skip if this trace does not exist
+            printf("%s::setTraceList: trace %s does not exist\n",
+                   thisscope->getName().c_str(), tracelist->item(i)->text().toStdString().c_str());
+            fflush(stdout);
+            continue;
+        }
+        if(tracelist->currentRow() == i) {
+            // add this trace if it doesnt exist yet
+            if(!thisscope->getTrace(trace->getName()))
+                thisscope->addTrace(trace);
+        } else { // remove this trace if it exists
+            if(thisscope->getTrace(trace->getName()))
+                thisscope->removeTrace(tracelist->item(i)->text().toStdString().c_str());
+        }
+    }
+    updateXYSource();
+    updateTrigger();
+    updateInfoTrace();
+}
+
+// void suicide()
+// remove according scope, then this control widget
+void ScopeControl::suicide() {
+    _parentController->removeScope(thisscope);
+    delete this;
+}
+
+// void updateTitle()
+// set title according to scope name...
+void ScopeControl::updateTitle() {
+    QString title = QString(tr("Scope %1")).arg(QString::fromStdString(thisscope->getName()));
+    emit(labelChanged(this, title));
+}
+
+// void setScopeName
+// asks user for new name for this scope
+void ScopeControl::setScopeName() {
+    bool ok = false;
+    QString text = QInputDialog::getText(this,"QOscC", tr("Enter new name for scope"),
+                                         QLineEdit::Normal, QString::fromStdString(thisscope->getName()), &ok);
+    if(ok && !text.isEmpty()) {
+        thisscope->setName(std::string(text.toStdString()));
+        updateTitle();
+        emit(hasChanged());
+    }
+}
+
+// void setSweep(float)
+// set new sweep value
+void ScopeControl::setSweep(const std::string & text) {
+    double value = stringToNum(text);
+    if(!value) {
+        emit(setStatus(tr("Cannot set sweep to zero!")));
+        return;
+    }
+    thisscope->setSweep(value);
+}
+
+// void updateSweep()
+// update the sweep slider
+void ScopeControl::updateSweep() {
+    int i;
+    for(i = 0 ; i < ytSweep->count(); i++) {
+        if(isNear(thisscope->getSweep(), stringToNum(ytSweep->itemText(i).toStdString()))) {
+            ytSweep->setCurrentIndex(i);
+            return;
+        }
+    }
+
+    ytSweep->addItem(QString("%1s").arg(thisscope->getSweep()));
+    ytSweep->setCurrentIndex(i);
+}
+
+// void updateBoxSweep()
+// set sweep groupbox to right visibility..
+void ScopeControl::updateBoxSweep() {
+    switch(thisscope->getMode()) {
+    case M_NONE:
+        boxSweep->hide();
+        break;
+    case M_YT:
+        boxSweep->show();
+        break;
+    case M_FFT:
+        boxSweep->hide();
+        break;
+    case M_XY:
+        boxSweep->hide();
+        break;
+    }
+}
+
+void ScopeControl::setModeNone() {
+    thisscope->setMode(M_NONE);
+    updateLocal();
+}
+
+void ScopeControl::setModeYt() {
+    thisscope->setMode(M_YT);
+    updateLocal();
+}
+
+void ScopeControl::setModeXy() {
+    thisscope->setMode(M_XY);
+    updateLocal();
+}
+
+void ScopeControl::setModeFft() {
+    thisscope->setMode(M_FFT);
+    updateLocal();
+}
+
+void ScopeControl::updateMode() {
+    switch(thisscope->getMode()) {
+    case M_NONE:
+        mode_none->setChecked(1);
+        break;
+    case M_YT:
+        mode_yt->setChecked(1);
+        break;
+    case M_XY:
+        mode_xy->setChecked(1);
+        break;
+    case M_FFT:
+        mode_fft->setChecked(1);
+        break;
+    }
+}
+
+void ScopeControl::setTedgeNone() {
+    thisscope->setTriggerEdge(TE_NONE);
+}
+
+void ScopeControl::setTedgePositive() {
+    thisscope->setTriggerEdge(TE_RISE);
+}
+
+void ScopeControl::setTedgeNegative() {
+    thisscope->setTriggerEdge(TE_FALL);
+}
+
+void ScopeControl::setTriggerLevel(float val) {
+    thisscope->setTriggerLevel(val);
+}
+
+void ScopeControl::updateTLevel() {
+	//to do Add/Fix slider
+    //sldLevel->setValue(thisscope->getTriggerLevel());
+}
+
+void ScopeControl::updateTEdge() {
+    switch(thisscope->getTriggerEdge()) {
+    case TE_NONE:
+        btnTedgeNone->setChecked(1);
+        break;
+    case TE_RISE:
+        btnTedgePositive->setChecked(1);
+        break;
+    case TE_FALL:
+        btnTedgeNegative->setChecked(1);
+        break;
+    }
+}
+
+void ScopeControl::setTriggerSource(const QString &n) {
+    thisscope->setTriggerSource(n.toStdString());
+}
+
+void ScopeControl::updateTriggerSource() {
+    unsigned int i;
+    stringlist liste;
+
+    thisscope->getTraceList(&liste);
+
+    triggerSource->clear();
+
+    for(i = 0; i < liste.count(); i++) {
+        triggerSource->addItem(QString::fromStdString(liste.getString(i)));
+        if(!liste.getString(i).compare(thisscope->getTriggerName()))
+            triggerSource->setCurrentIndex(i);
+    }
+    // set trigger source, if none was selected
+    setTriggerSource(triggerSource->currentText());
+}
+
+void ScopeControl::updateTrigger() {
+    updateTriggerSource();
+    switch(thisscope->getMode()) {
+    case M_YT:
+        triggerbox->show();
+        break;
+    default:
+        triggerbox->hide();
+    }
+}
+
+void ScopeControl::updateXYSource() {
+    unsigned int i;
+    stringlist liste;
+    thisscope->getTraceList(&liste);
+
+    lstXTrace->clear();
+    lstYTrace->clear();
+
+    for(i = 0; i < liste.count(); i++) {
+        lstXTrace->addItem(QString::fromStdString(liste.getString(i)));
+        if(!liste.getString(i).compare(thisscope->getXYSourceXName()))
+            lstXTrace->setCurrentIndex(i);
+        lstYTrace->addItem(QString::fromStdString(liste.getString(i)));
+        if(!liste.getString(i).compare(thisscope->getXYSourceYName()))
+            lstYTrace->setCurrentIndex(i);
+    }
+
+    switch(thisscope->getMode()) {
+    case M_XY:
+        globalXYBox->show();
+        break;
+    default:
+        globalXYBox->hide();
+    }
+
+    if(lstXTrace->count())
+        setXSource(lstXTrace->currentText());
+    if(lstYTrace->count())
+        setYSource(lstYTrace->currentText());
+}
+
+void ScopeControl::setXSource(const QString &n) {
+    thisscope->setXYSourceX(n.toStdString());
+}
+
+void ScopeControl::setYSource(const QString &n) {
+    thisscope->setXYSourceY(n.toStdString());
+}
+
+void ScopeControl::setHold(bool hold) {
+    thisscope->setHold(hold);
+}
+
+void ScopeControl::updateHold() {
+    hold->setChecked(thisscope->getHold());
+}
+
+void ScopeControl::setDispLog(bool n) {
+    thisscope->setDispLog(n);
+}
+
+void ScopeControl::updateDispLog() {
+    dispLog->setChecked(thisscope->getDispLog());
+}
+
+void ScopeControl::setDispFMin(const QString & text) {
+    unsigned int f = int(stringToNum(text.toStdString()) + 0.5);
+    if(f >= thisscope->getDispFMax()) {
+        emit(setStatus(tr("Cannot set low frequency above high frequency!")));
+        updateDispFMin();
+        return;
+    }
+    thisscope->setDispFMin(f);
+}
+
+void ScopeControl::setDispFMax(const QString & text) {
+    unsigned int f = int(stringToNum(text.toStdString()) + 0.5);
+    if(f <= thisscope->getDispFMin()) {
+        emit(setStatus(tr("Cannot set high frequency below low frequency!")));
+        updateDispFMax();
+        return;
+    }
+    thisscope->setDispFMax(f);
+}
+
+void ScopeControl::updateDispFMin() {
+    int i;
+    for(i = 0; i < dispFMin->count(); i++) {
+        if(isNear(thisscope->getDispFMin(), stringToNum(dispFMin->itemText(i).toStdString()))) {
+            dispFMin->setCurrentIndex(i);
+            return;
+        }
+    }
+    // item not yet in list...
+    dispFMin->addItem(QString::fromStdString(numToString(thisscope->getDispFMin())) + tr("Hz"));
+    dispFMin->setCurrentIndex(i);
+}
+
+void ScopeControl::updateDispFMax() {
+    int i;
+    for(i = 0; i < dispFMax->count(); i++) {
+        if(isNear(thisscope->getDispFMax(), stringToNum(dispFMax->itemText(i).toStdString()))) {
+            dispFMax->setCurrentIndex(i);
+            return;
+        }
+    }
+    // item not yet in list...
+    dispFMax->addItem(QString::fromStdString(numToString(thisscope->getDispFMax())) + tr("Hz"));
+    dispFMax->setCurrentIndex(i);
+}
+
+void ScopeControl::setInfoTrace(const QString &name) {
+    if(name != "")
+        thisscope->setInfoTraceName(name.toStdString());
+}
+
+void ScopeControl::updateInfoTrace() {
+    stringlist liste;
+
+    thisscope->getTraceList(&liste);
+
+    infoTrace->clear();
+    infoTrace->addItem(tr("none"));
+    for(unsigned int i = 0; i < liste.count(); i++){
+        infoTrace->addItem(QString::fromStdString(liste.getString(i)));
+        if(liste.getString(i) == thisscope->getInfoTraceName()){
+            infoTrace->setCurrentIndex(i + 1);
+        }
+    }
+}
+
+void ScopeControl::updateDispDb() {
+    dispDb->setChecked(thisscope->getDispDb());
+}
+
+void ScopeControl::updateDispDbRef() {
+    // search the list for a usable entry...
+    int i; // uugh. doesnt work!!!!!!!!!!!!
+    for(i = 0; i < dispDbRef->count(); i++) { // compare to millivolts
+        if(isNear(stringToNum(dispDbRef->itemText(i).toStdString()), thisscope->getDispDbRef()) ) {
+            dispDbRef->setCurrentIndex(i);
+            return;
+        }
+    }
+    // add one if none found and select it
+    dispDbRef->addItem(QString::fromStdString(numToString(thisscope->getDispDbRef())) + tr("V"));
+    dispDbRef->setCurrentIndex(i);
+}
+
+void ScopeControl::setDispDb(bool n) {
+    thisscope->setDispDb(n);
+    updateBoxDbRange();
+    updateBoxVDiv();
+}

@@ -32,7 +32,7 @@
 class ScopeControl : QGroupBox {
     Q_OBJECT
 public:
-    ScopeControl(ScopeClass *scope, QTabWidget *parent = 0, const char *name = 0);
+    ScopeControl(ScopeClass *scope,ControllerClass* parentController, QTabWidget *parent = 0, const char *name = 0);
     ~ScopeControl();
 
 public slots:
@@ -44,6 +44,7 @@ signals:
 
 private:
     ScopeClass *thisscope;
+    ControllerClass *_parentController;
 
     QPushButton *btnColGrid;
     QPushButton *btnColMark;
@@ -101,7 +102,7 @@ private slots:
     void setTraceList();
     void setScopeName();
     void setScopeFont();
-    void setSweep(const QString &);
+    void setSweep(const std::string &);
     void setModeNone();
     void setModeYt();
     void setModeXy();
