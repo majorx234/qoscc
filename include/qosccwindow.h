@@ -43,11 +43,11 @@ private:
     */
     QTabWidget *groups;
 
-    //void createControls();
-    //void destroyControls(); 
+    void createControls();
+    void destroyControls(); 
 
     std::string conffilename;
-private:
+
     Ui::QOscCWindow *ui;
 };      
 #endif // QOSCCWINDOW_H

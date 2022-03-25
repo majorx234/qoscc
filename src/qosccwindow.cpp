@@ -19,7 +19,7 @@ QOscCWindow::QOscCWindow(QWidget *parent) :
                              tr("QOscC -- No configuration file found"),
                              tr("No configuration file (%1) has been found. I'll use default settings.\n" 
                                 "You first have to add at least a trace, a scope and a device and configure "
-                                "them to your needs.").arg(QString::fromUtf8(conffilename.c_str())));
+                                "them to your needs.").arg(QString::fromStdString(conffilename)));
   }
   setWindowTitle("QOscC " VERSION);
   groups = new QTabWidget(this);
@@ -58,6 +58,7 @@ QOscCWindow::QOscCWindow(QWidget *parent) :
   toolBarFile->addAction(actionOpen);
  */
   
+  createControls();
 
   
 
@@ -68,9 +69,20 @@ QOscCWindow::~QOscCWindow() {
   delete ui;
 }
 
+// add all traces and devices that exist by now
+void QOscCWindow::createControls() {
+    // create controls for scopes
+    stringlist scopeliste;
+    controller->getScopeList(&scopeliste);
+}
+
+void QOscCWindow::destroyControls() {
+
+}
+
 void QOscCWindow::slotFileOpen()
 {
-     statusBar()->showMessage(tr("File Opened"),2000);
+    statusBar()->showMessage(tr("File Opened"),2000);
 }
 
 void QOscCWindow::slotFileQuit() {
