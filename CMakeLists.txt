@@ -89,6 +89,17 @@ set(QOSCCWINDOW_SOURCES
 QT5_WRAP_UI(UISrcs 
             ui/qosccwindow.ui)
 
+set(DATASTOREDIALOG_SOURCES
+    src/datastoredialog.cpp
+    include/datastoredialog.h)
+
+QT5_WRAP_UI(DATASTOREDIALOG_UISrcs 
+            ui/datastoredialog.ui)
+
+QT5_WRAP_CPP( DATASTOREDIALOG_MOCSOURCES
+  ${DATASTOREDIALOG_SOURCES}
+)
+
 QT5_WRAP_CPP( QOSCCWINDOW_MOCSOURCES
   ${QOSCCWINDOW_SOURCES}
 )
@@ -190,6 +201,22 @@ target_link_libraries(controllerclass
   dspnone
   Threads::Threads
 )
+
+add_library(datastoredialog
+            ${DATASTOREDIALOG_SOURCES}
+            ${DATASTOREDIALOG_MOCSOURCES}
+            ${DATASTOREDIALOG_UISrcs}
+            )
+target_include_directories(datastoredialog PRIVATE include)
+target_include_directories(datastoredialog PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(datastoredialog SYSTEM
+  PUBLIC 
+    ${Qt5Core_INCLUDE_DIRS}
+    ${Qt5Widgets_INCLUDE_DIRS})
+target_link_libraries(datastoredialog PUBLIC
+    Qt5::Core
+    Qt5::Widgets
+)            
 
 add_library(scopecontrol
             ${SCOPECONTROL_SOURCES}
