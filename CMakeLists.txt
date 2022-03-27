@@ -105,7 +105,8 @@ QT5_WRAP_CPP( QOSCCWINDOW_MOCSOURCES
 )
 
 QT5_WRAP_CPP( SCOPECONTROL_MOCSOURCES
-  ${SCOPECONROL_SOURCES}
+  ${SCOPECONTROL_SOURCES}
+    
 )
 
 add_library(misc
@@ -232,7 +233,7 @@ target_link_libraries(scopecontrol PUBLIC
     Qt5::Core
     Qt5::Widgets
     controllerclass
-    scopeclass
+    datastoredialog
 )
 
 add_library(qosccwindow
@@ -252,6 +253,7 @@ target_link_libraries(qosccwindow PUBLIC
     Qt5::Core
     Qt5::Widgets
     controllerclass
+    scopecontrol
 )
 
 add_executable(qoscc_test
