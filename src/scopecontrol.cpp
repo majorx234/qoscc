@@ -40,7 +40,7 @@
 #include "traceclass.h"
 #include "stringlist.h"
 #include "misc.h"
-//#include "datastore.h"
+#include "datastoredialog.h"
 
 ScopeControl::ScopeControl(ScopeClass *scope,ControllerClass* parentController, QTabWidget *parent, const char *name) 
   : QGroupBox(QString(name),parent)
@@ -690,8 +690,7 @@ void ScopeControl::showMiscOptsMenu() {
 // void saveDataFile()
 // store displayed data to file
 void ScopeControl::saveDataFile() {
-	/*
-    dataStoreDialog *dl = new dataStoreDialog(this, "dialog");
+    DataStoreDialog *dl = new DataStoreDialog(this);
     
     // set default values.... (visible data at optimum sampling rate)
     switch(thisscope->getMode()){
@@ -716,7 +715,7 @@ void ScopeControl::saveDataFile() {
     FILE *fd;
     if(dl->exec() == QDialog::Accepted){
         // open file
-        fd = fopen(dl->getFileName().ascii(), "w");
+        fd = fopen(dl->getFileName().toStdString().c_str(), "w");
         if(!fd) {
             emit(setStatus(tr("Could not write file!")));
             QMessageBox::warning(this, tr("QOscC - Could not open file"),
@@ -736,18 +735,16 @@ void ScopeControl::saveDataFile() {
     
     fclose(fd);
     
-    delete dl; */
+    delete dl; 
 }
 
 // void setScopeFont()
 // poup dialog to select a font for the scope window
 void ScopeControl::setScopeFont(){
-	/*
     bool ok;
     QFont font;
-    font.fromString(dataStoreDialog(thisscope->getFont()));
+    font.fromString(QString::fromStdString(thisscope->getFont()));
     font = QFontDialog::getFont(&ok, font);
     if(ok)
-        thisscope->setFont(font.toString());
-  */
+        thisscope->setFont(font.toString().toStdString());
 }
