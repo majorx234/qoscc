@@ -536,3 +536,218 @@ void ScopeControl::setDispDb(bool n) {
     updateBoxDbRange();
     updateBoxVDiv();
 }
+
+void ScopeControl::setDispDbRef(const QString & text) {
+    double number = stringToNum(text.toStdString());
+    if(number == 0.0) {
+        emit(setStatus(tr("Cannot set zero as reference!")));
+        updateDispDbRef();
+        return;
+    }
+    thisscope->setDispDbRef(number);
+}
+
+void ScopeControl::updateDispDbMin() {
+    int i;
+    for(i = 0; i < dispDbMin->count(); i++) {
+        if(isNear(stringToNum(dispDbMin->itemText(i).toStdString()), thisscope->getDbMin())) {
+            dispDbMin->setCurrentIndex(i);
+            return;
+        }
+    }
+    dispDbMin->addItem(QString("%1dB").arg(QString::fromStdString(numToString(thisscope->getDbMin()))));
+    dispDbMin->setCurrentIndex(i);
+}
+
+void ScopeControl::updateDispDbMax() {
+    int i;
+    for(i = 0; i < dispDbMax->count(); i++) {
+        if(isNear(stringToNum(dispDbMax->itemText(i).toStdString()), thisscope->getDbMax())) {
+            dispDbMax->setCurrentIndex(i);
+            return;
+        }
+    }
+    dispDbMax->addItem(QString("%1dB").arg(QString::fromStdString(numToString(thisscope->getDbMax()))));
+    dispDbMax->setCurrentIndex(i);
+}
+
+void ScopeControl::setDispDbMin(const QString & t) {
+    if(stringToNum(t.toStdString()) >= thisscope->getDbMax()) {
+        emit(setStatus(tr("Cannot set low limit above the high limit!")));
+        updateDispDbMin();
+        return;
+    }
+    thisscope->setDbMin(stringToNum(t.toStdString()));
+}
+
+void ScopeControl::setDispDbMax(const QString & t) {
+    if(stringToNum(t.toStdString()) <= thisscope->getDbMin()) {
+        emit(setStatus(tr("Cannot set high limit below the low limit!")));
+        updateDispDbMax();
+        return;
+    }
+    thisscope->setDbMax(stringToNum(t.toStdString()));
+}
+
+void ScopeControl::updateBoxFRange() {
+    switch(thisscope->getMode()) {
+    case M_NONE:
+        boxFRange->hide();
+        break;
+    case M_YT:
+        boxFRange->hide();
+        break;
+    case M_XY:
+        boxFRange->hide();
+        break;
+    case M_FFT:
+        boxFRange->show();
+        break;
+    }
+}
+
+void ScopeControl::updateBoxDbRange() {
+    switch(thisscope->getMode()) {
+    case M_NONE:
+        boxDbRange->hide();
+        break;
+    case M_YT:
+        boxDbRange->hide();
+        break;
+    case M_XY:
+        boxDbRange->hide();
+        break;
+    case M_FFT:
+        if(thisscope->getDispDb())
+            boxDbRange->show();
+        else
+            boxDbRange->hide();
+        break;
+    }
+}
+
+void ScopeControl::updateBoxScaling() {
+    switch(thisscope->getMode()) {
+    case M_NONE:
+        boxScaling->hide();
+        break;
+    case M_YT:
+        boxScaling->hide();
+        break;
+    case M_XY:
+        boxScaling->hide();
+        break;
+    case M_FFT:
+        boxScaling->show();
+    }
+}
+
+
+void ScopeControl::setVDiv(const QString & text) {
+    double value = stringToNum(text.toStdString());
+    if(value == 0) {
+        emit(setStatus(tr("Cannot set scale to 0 volts per DIV!")));
+        return;
+    }
+    thisscope->setVDiv(value);
+}
+
+void ScopeControl::updateVDiv() {
+    int i;
+    for(i = 0; i < vDiv->count(); i++) {
+        if(isNear(stringToNum(vDiv->itemText(i).toStdString()), thisscope->getVDiv())) {
+            vDiv->setCurrentIndex(i);
+            return;
+        }
+    }
+    vDiv->addItem(QString::fromStdString(numToString(thisscope->getVDiv())+"V"));
+    vDiv->setCurrentIndex(i);
+}
+
+void ScopeControl::updateBoxVDiv() {
+    switch(thisscope->getMode()) {
+    case M_NONE:
+        boxVDiv->hide();
+        break;
+    case M_YT:
+        boxVDiv->show();
+        break;
+    case M_XY:
+        boxVDiv->show();
+        break;
+    case M_FFT:
+        if(thisscope->getDispDb())
+            boxVDiv->hide();
+        else
+            boxVDiv->show();
+    }
+}
+
+void ScopeControl::showMiscOptsMenu() {
+    miscOptsMenu->exec(QCursor::pos());
+}
+
+// void saveDataFile()
+// store displayed data to file
+void ScopeControl::saveDataFile() {
+	/*
+    dataStoreDialog *dl = new dataStoreDialog(this, "dialog");
+    
+    // set default values.... (visible data at optimum sampling rate)
+    switch(thisscope->getMode()){
+        case M_YT:
+        case M_XY:
+            dl->setType(dbuffer::t);        
+            break;
+        case M_FFT:
+            dl->setType(dbuffer::f);
+            break;
+    }
+    if(thisscope->getDispLog() && thisscope->getMode() == M_FFT){
+        dl->setStart(thisscope->getDispFMin());
+        dl->setEnd(thisscope->getDispFMax());
+    }
+    else{
+        dl->setStart(0); // EEh, this does not respect any shifting in the trace....
+        dl->setEnd(thisscope->getSweep() * thisscope->getHDivs());
+    }
+    dl->setRate(thisscope->getMaxDspRate());
+    
+    FILE *fd;
+    if(dl->exec() == QDialog::Accepted){
+        // open file
+        fd = fopen(dl->getFileName().ascii(), "w");
+        if(!fd) {
+            emit(setStatus(tr("Could not write file!")));
+            QMessageBox::warning(this, tr("QOscC - Could not open file"),
+                                 tr("Could not open \"%1\" for writing.").arg(dl->getFileName()));
+            return;
+        }
+    }
+    else{  // if canceled
+        emit(setStatus(tr("Canceled")));
+        return;
+    }
+
+    if(!thisscope->storeValues(fd, dl->getStart(), dl->getRate(), dl->getNSamples()))
+        emit(setStatus(tr("Datafile %1 successfully written").arg(dl->getFileName())));
+    else
+        emit(setStatus(tr("Writing datafile %1 failed!").arg(dl->getFileName())));
+    
+    fclose(fd);
+    
+    delete dl; */
+}
+
+// void setScopeFont()
+// poup dialog to select a font for the scope window
+void ScopeControl::setScopeFont(){
+	/*
+    bool ok;
+    QFont font;
+    font.fromString(dataStoreDialog(thisscope->getFont()));
+    font = QFontDialog::getFont(&ok, font);
+    if(ok)
+        thisscope->setFont(font.toString());
+  */
+}
