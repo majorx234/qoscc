@@ -5,6 +5,7 @@
 
 #include "qosccwindow.h"
 #include "ui_qosccwindow.h"
+#include "scopecontrol.h"
 
 QOscCWindow::QOscCWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -74,6 +75,15 @@ void QOscCWindow::createControls() {
     // create controls for scopes
     stringlist scopeliste;
     controller->getScopeList(&scopeliste);
+    for(unsigned int i = 0; i < scopeliste.count(); i++) {
+        ScopeControl *scopectl = new ScopeControl(controller->getScope(scopeliste.getString(i)), controller, groups, "scope");
+        QString title = QString(tr("Scope %1")).arg(QString::fromStdString(scopeliste.getString(i)));
+        groups->addTab(scopectl, title);
+        connect(this, SIGNAL(hasChanged()), scopectl, SLOT(update()));
+        connect(scopectl, SIGNAL(hasChanged()), this, SLOT(update()));
+        connect(scopectl, SIGNAL(setStatus(const QString& )), SLOT(setStatus(const QString&)));
+        connect(scopectl, SIGNAL(labelChanged(QWidget*, const QString&)), SLOT(changeLabel(QWidget*, const QString&)));
+    }
 }
 
 void QOscCWindow::destroyControls() {

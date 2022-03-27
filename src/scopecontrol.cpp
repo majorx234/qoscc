@@ -42,8 +42,8 @@
 #include "misc.h"
 #include "datastoredialog.h"
 
-ScopeControl::ScopeControl(ScopeClass *scope,ControllerClass* parentController, QTabWidget *parent, const char *name) 
-  : QGroupBox(QString(name),parent)
+ScopeControl::ScopeControl(ScopeInterface *scope,ControllerClass* parentController, QTabWidget *parent, const std::string name) 
+  : QGroupBox(QString::fromStdString(name),parent)
   ,_parentController(parentController)
 {
     thisscope = scope;
@@ -227,7 +227,7 @@ void ScopeControl::suicide() {
 // set title according to scope name...
 void ScopeControl::updateTitle() {
     QString title = QString(tr("Scope %1")).arg(QString::fromStdString(thisscope->getName()));
-    emit(labelChanged(this, title));
+    emit labelChanged(this, title);
 }
 
 // void setScopeName
@@ -239,7 +239,7 @@ void ScopeControl::setScopeName() {
     if(ok && !text.isEmpty()) {
         thisscope->setName(std::string(text.toStdString()));
         updateTitle();
-        emit(hasChanged());
+        emit hasChanged();
     }
 }
 
@@ -248,7 +248,7 @@ void ScopeControl::setScopeName() {
 void ScopeControl::setSweep(const std::string & text) {
     double value = stringToNum(text);
     if(!value) {
-        emit(setStatus(tr("Cannot set sweep to zero!")));
+        emit setStatus(tr("Cannot set sweep to zero!"));
         return;
     }
     thisscope->setSweep(value);
@@ -450,7 +450,7 @@ void ScopeControl::updateDispLog() {
 void ScopeControl::setDispFMin(const QString & text) {
     unsigned int f = int(stringToNum(text.toStdString()) + 0.5);
     if(f >= thisscope->getDispFMax()) {
-        emit(setStatus(tr("Cannot set low frequency above high frequency!")));
+        emit setStatus(tr("Cannot set low frequency above high frequency!"));
         updateDispFMin();
         return;
     }
@@ -460,7 +460,7 @@ void ScopeControl::setDispFMin(const QString & text) {
 void ScopeControl::setDispFMax(const QString & text) {
     unsigned int f = int(stringToNum(text.toStdString()) + 0.5);
     if(f <= thisscope->getDispFMin()) {
-        emit(setStatus(tr("Cannot set high frequency below low frequency!")));
+        emit setStatus(tr("Cannot set high frequency below low frequency!"));
         updateDispFMax();
         return;
     }
@@ -540,7 +540,7 @@ void ScopeControl::setDispDb(bool n) {
 void ScopeControl::setDispDbRef(const QString & text) {
     double number = stringToNum(text.toStdString());
     if(number == 0.0) {
-        emit(setStatus(tr("Cannot set zero as reference!")));
+        emit setStatus(tr("Cannot set zero as reference!"));
         updateDispDbRef();
         return;
     }
@@ -573,7 +573,7 @@ void ScopeControl::updateDispDbMax() {
 
 void ScopeControl::setDispDbMin(const QString & t) {
     if(stringToNum(t.toStdString()) >= thisscope->getDbMax()) {
-        emit(setStatus(tr("Cannot set low limit above the high limit!")));
+        emit setStatus(tr("Cannot set low limit above the high limit!"));
         updateDispDbMin();
         return;
     }
@@ -582,7 +582,7 @@ void ScopeControl::setDispDbMin(const QString & t) {
 
 void ScopeControl::setDispDbMax(const QString & t) {
     if(stringToNum(t.toStdString()) <= thisscope->getDbMin()) {
-        emit(setStatus(tr("Cannot set high limit below the low limit!")));
+        emit setStatus(tr("Cannot set high limit below the low limit!"));
         updateDispDbMax();
         return;
     }
@@ -646,7 +646,7 @@ void ScopeControl::updateBoxScaling() {
 void ScopeControl::setVDiv(const QString & text) {
     double value = stringToNum(text.toStdString());
     if(value == 0) {
-        emit(setStatus(tr("Cannot set scale to 0 volts per DIV!")));
+        emit setStatus(tr("Cannot set scale to 0 volts per DIV!"));
         return;
     }
     thisscope->setVDiv(value);
@@ -717,21 +717,21 @@ void ScopeControl::saveDataFile() {
         // open file
         fd = fopen(dl->getFileName().toStdString().c_str(), "w");
         if(!fd) {
-            emit(setStatus(tr("Could not write file!")));
+            emit setStatus(tr("Could not write file!"));
             QMessageBox::warning(this, tr("QOscC - Could not open file"),
                                  tr("Could not open \"%1\" for writing.").arg(dl->getFileName()));
             return;
         }
     }
     else{  // if canceled
-        emit(setStatus(tr("Canceled")));
+        emit setStatus(tr("Canceled"));
         return;
     }
 
     if(!thisscope->storeValues(fd, dl->getStart(), dl->getRate(), dl->getNSamples()))
-        emit(setStatus(tr("Datafile %1 successfully written").arg(dl->getFileName())));
+        emit setStatus(tr("Datafile %1 successfully written").arg(dl->getFileName()));
     else
-        emit(setStatus(tr("Writing datafile %1 failed!").arg(dl->getFileName())));
+        emit setStatus(tr("Writing datafile %1 failed!").arg(dl->getFileName()));
     
     fclose(fd);
     

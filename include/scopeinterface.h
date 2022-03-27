@@ -24,6 +24,10 @@ public:
   virtual void setXPos(int) = 0;
   virtual void setYPos(int) = 0;
 
+  virtual TraceInterface *getTrace(const char *) = 0;
+  virtual TraceInterface *getTrace(const std::string &) = 0;
+  virtual TraceInterface *getTrace(unsigned int) = 0;
+
   virtual int removeTrace(TraceInterface *) = 0;
   virtual int removeTrace(const std::string &) = 0;
 

@@ -4,7 +4,7 @@
 class ScopeObserver
 {
 public:
- virtual void do_sth(const int value) = 0;  
+ virtual bool update(const int value) = 0;  
 };
 
 
