@@ -82,6 +82,16 @@ set(SCOPECONTROL_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/scopecontrol.h
 )
 
+set(TRACECONTROL_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/tracecontrol.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/tracecontrol.h
+)
+
+set(DEVICECONTROL_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/devicecontrol.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/devicecontrol.h
+)
+
 set(QOSCCWINDOW_SOURCES
     src/qosccwindow.cpp
     include/qosccwindow.h)
@@ -106,7 +116,14 @@ QT5_WRAP_CPP( QOSCCWINDOW_MOCSOURCES
 
 QT5_WRAP_CPP( SCOPECONTROL_MOCSOURCES
   ${SCOPECONTROL_SOURCES}
-    
+)
+
+QT5_WRAP_CPP( TRACECONTROL_MOCSOURCES
+  ${TRACECONTROL_SOURCES}
+)
+
+QT5_WRAP_CPP( DEVICECONTROL_MOCSOURCES
+  ${DEVICECONTROL_SOURCES}
 )
 
 add_library(misc
@@ -219,6 +236,36 @@ target_link_libraries(datastoredialog PUBLIC
     Qt5::Widgets
 )            
 
+add_library(tracecontrol
+            ${TRACECONTROL_SOURCES}
+            ${TRACECONTROL_MOCSOURCES}
+)
+target_include_directories(tracecontrol PRIVATE include)
+target_include_directories(tracecontrol PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(tracecontrol SYSTEM
+  PUBLIC 
+    ${Qt5Core_INCLUDE_DIRS}
+    ${Qt5Widgets_INCLUDE_DIRS})
+target_link_libraries(tracecontrol PUBLIC
+    Qt5::Core
+    Qt5::Widgets
+)
+
+add_library(devicecontrol
+            ${DEVICECONTROL_SOURCES}
+            ${DEVICECONTROL_MOCSOURCES}
+)
+target_include_directories(devicecontrol PRIVATE include)
+target_include_directories(devicecontrol PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(devicecontrol SYSTEM
+  PUBLIC 
+    ${Qt5Core_INCLUDE_DIRS}
+    ${Qt5Widgets_INCLUDE_DIRS})
+target_link_libraries(devicecontrol PUBLIC
+    Qt5::Core
+    Qt5::Widgets
+)
+
 add_library(scopecontrol
             ${SCOPECONTROL_SOURCES}
             ${SCOPECONTROL_MOCSOURCES}
@@ -254,6 +301,7 @@ target_link_libraries(qosccwindow PUBLIC
     Qt5::Widgets
     controllerclass
     scopecontrol
+    devicecontrol
 )
 
 add_executable(qoscc_test

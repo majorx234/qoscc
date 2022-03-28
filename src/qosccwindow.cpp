@@ -6,6 +6,7 @@
 #include "qosccwindow.h"
 #include "ui_qosccwindow.h"
 #include "scopecontrol.h"
+#include "devicecontrol.h"
 
 QOscCWindow::QOscCWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -83,6 +84,20 @@ void QOscCWindow::createControls() {
         connect(scopectl, SIGNAL(hasChanged()), this, SLOT(update()));
         connect(scopectl, SIGNAL(setStatus(const QString& )), SLOT(setStatus(const QString&)));
         connect(scopectl, SIGNAL(labelChanged(QWidget*, const QString&)), SLOT(changeLabel(QWidget*, const QString&)));
+    }
+    
+    stringlist deviceliste;
+    controller->getDeviceList(&deviceliste);
+    // create controls for devices
+    for(unsigned int i = 0; i < deviceliste.count(); i++) {
+        DeviceControl *devctl = new DeviceControl(controller->getDevice(deviceliste.getString(i)), controller, groups, "device");
+        QString title = QString(tr("Device %1")).arg(QString::fromStdString(deviceliste.getString(i)));
+        groups->addTab(devctl, title);
+        connect(this, SIGNAL(hasChanged()), devctl, SLOT(update()));
+        connect(devctl, SIGNAL(hasChanged()), this, SLOT(update()));
+        controller->getDevice(deviceliste.getString(i))->start();
+        connect(devctl, SIGNAL(setStatus(const QString& )), SLOT(setStatus(const QString&)));
+        connect(devctl, SIGNAL(labelChanged(QWidget*, const QString&)), SLOT(changeLabel(QWidget*, const QString&)));
     }
 }
 
