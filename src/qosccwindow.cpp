@@ -32,16 +32,13 @@ QOscCWindow::QOscCWindow(QWidget *parent) :
   groups = new QTabWidget(this);
   setCentralWidget(groups);
 
-/*
-  //create a toolBart
-  toolBarFile = addToolBar("File");
-  //add the same action in the toolbar.
-  toolBarFile->addAction(actionOpen);
- */
   initActions();
   initMenuBar();
   createControls();
 
+  statusLabel = new QLabel(this);
+  statusLabel->setText("initialized"); 
+  ui->statusBar->addPermanentWidget(statusLabel);
   statusBar()->addWidget(new QLabel(tr("Welcome to QOscC Version %1").arg(VERSION), this));
 }
 
@@ -148,7 +145,7 @@ void QOscCWindow::initMenuBar() {
 
 void QOscCWindow::slotFileOpen()
 {
-    statusBar()->showMessage(tr("File Opened"),2000);
+    ui->statusBar->showMessage(tr("File Opened"),2000);
 }
 
 void QOscCWindow::slotFileQuit() {
@@ -291,20 +288,20 @@ void QOscCWindow::addTrace() {
     connect(tracectl, SIGNAL(hasChanged()), this, SLOT(update()));
     connect(tracectl, SIGNAL(setStatus(const QString& )), SLOT(setStatus(const QString&)));
     connect(tracectl, SIGNAL(labelChanged(QWidget*, const QString&)), SLOT(changeLabel(QWidget*, const QString&)));
-    emit(update());
+    emit update();
     setStatus(tr("Trace %1 added").arg(name));
 }
 
 // void setStatus(const QString &)
 // set the text in the Status bar
 void QOscCWindow::setStatus(const QString & text) {
-    status->showMessage(text);
+    ui->statusBar->showMessage(text);
 }
 
 // void update();
 // udpate all widgets in this application.....
 void QOscCWindow::update() {
-    emit(hasChanged());
+    emit hasChanged();
 }
 
 // void changeLabel(const QWidget&, const QString&)

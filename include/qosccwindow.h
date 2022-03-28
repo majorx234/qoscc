@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "controllerclass.h"
+#include <QLabel>
 
 #define VERSION "0.41"
 
@@ -42,17 +43,14 @@ private:
     QAction *fileOpen;
     QAction *fileQuit;
     QAction *helpAboutApp;
-    /* tool bar
-    QToolBar *toolBarFile
 
-    */
     QAction *setSave;
     QAction *setAddDevice;
     QAction *setAddScope;
     QAction *setAddTrace;
     QTabWidget *groups;
 
-    QStatusBar *status;
+    QLabel *statusLabel;
 
     void createControls();
     void destroyControls();

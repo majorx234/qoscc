@@ -114,7 +114,7 @@ std::string numToString(double value) {
 }
 
 void printMessage(const char *file, const char *function, int line, int level, const char *text) {
-    char *levelInfo;
+    std::string levelInfo;
     if(level < MSG_LEVEL)
         return;
     FILE *output;
@@ -141,7 +141,7 @@ void printMessage(const char *file, const char *function, int line, int level, c
         output = stderr;
         break;
     }
-    fprintf(output, "%s %s:%d: %s: %s", levelInfo, file, line, function, text);
+    fprintf(output, "%s %s:%d: %s: %s", levelInfo.c_str(), file, line, function, text);
     fflush(output);
 }
 
