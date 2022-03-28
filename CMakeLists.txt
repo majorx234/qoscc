@@ -302,6 +302,7 @@ target_link_libraries(qosccwindow PUBLIC
     controllerclass
     scopecontrol
     devicecontrol
+    tracecontrol
 )
 
 add_executable(qoscc_test

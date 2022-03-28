@@ -18,22 +18,27 @@ public:
     explicit QOscCWindow(QWidget *parent = 0);
     ~QOscCWindow();
 
- //   void initActions();    
- //   void initMenuBar();
+    void initActions();
+    void initMenuBar();
     ControllerClass* controller;
 public slots:  
     void slotFileOpen();  
     void slotFileQuit();
     void slotHelpAbout();
-//    void slotSaveSettings();
-//    void update();
+    void saveSettings();
+    void addDevice();
+    void addScope();
+    void addTrace();
+    void setStatus(const QString &);
+    void update();
+    void changeLabel(QWidget *, const QString &);
 signals:
-    void hasChanged();   
+    void hasChanged();
 private:
     QMenu *fileMenu;
     QMenu *helpMenu;
-    QMenu *setMenu;  
-    
+    QMenu *setMenu;
+
     QAction *fileOpen;
     QAction *fileQuit;
     QAction *helpAboutApp;
@@ -41,13 +46,19 @@ private:
     QToolBar *toolBarFile
 
     */
+    QAction *setSave;
+    QAction *setAddDevice;
+    QAction *setAddScope;
+    QAction *setAddTrace;
     QTabWidget *groups;
 
+    QStatusBar *status;
+
     void createControls();
-    void destroyControls(); 
+    void destroyControls();
 
     std::string conffilename;
 
     Ui::QOscCWindow *ui;
-};      
+};
 #endif // QOSCCWINDOW_H
