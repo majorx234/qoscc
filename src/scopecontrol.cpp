@@ -58,6 +58,15 @@ ScopeControl::ScopeControl(ScopeInterface *scope,ControllerClass* parentControll
     QAction *set_text_color = new QAction("Set text color",this);
     QAction *set_scope_font = new QAction("Set scope font",this);
     
+    connect(set_name, SIGNAL(triggered()), this, SLOT(setScopeName()));
+    connect(delete_scope, SIGNAL(triggered()), this, SLOT(suicide()));
+    connect(export_data, SIGNAL(triggered()), this, SLOT(saveDataFile()));
+    connect(set_grid_color, SIGNAL(triggered()), this, SLOT(setColGrid()));
+    connect(set_mark_color, SIGNAL(triggered()), this, SLOT(setColMark()));
+    connect(set_background_color, SIGNAL(triggered()), this, SLOT(setColBg()));
+    connect(set_text_color, SIGNAL(triggered()), this, SLOT(setColText()));
+    connect(set_scope_font, SIGNAL(triggered()), this, SLOT(setScopeFont()));
+
     miscOptsMenu->addAction(set_name);
     miscOptsMenu->addAction(delete_scope);
     miscOptsMenu->addSeparator();
@@ -70,21 +79,8 @@ ScopeControl::ScopeControl(ScopeInterface *scope,ControllerClass* parentControll
     miscOptsMenu->addSeparator();
     miscOptsMenu->addAction(set_scope_font);
 
-   /*
-    miscOptsMenu->insertItem(tr("Set name"), this, SLOT(setScopeName()));
-    miscOptsMenu->insertItem(tr("Delete scope"),this, SLOT(suicide()));
-    miscOptsMenu->insertSeparator();
-    miscOptsMenu->insertItem(tr("Export data"), this, SLOT(saveDataFile()));
-    miscOptsMenu->insertSeparator();
-    miscOptsMenu->insertItem(tr("Set grid color"), this, SLOT(setColGrid()));
-    miscOptsMenu->insertItem(tr("Set mark color"), this, SLOT(setColMark()));
-    miscOptsMenu->insertItem(tr("Set background color"), this, SLOT(setColBg()));
-    miscOptsMenu->insertItem(tr("Set text color"), this, SLOT(setColText()));
-    miscOptsMenu->insertSeparator();
-    miscOptsMenu->insertItem(tr("Set scope font"), this, SLOT(setScopeFont()));
-   */
     QPushButton *btnPopupMenu = new QPushButton(tr("Settings"), this);
-    //connect(btnPopupMenu, SIGNAL(clicked()), SLOT(showMiscOptsMenu()));
+    connect(btnPopupMenu, SIGNAL(clicked()), SLOT(showMiscOptsMenu()));
 
     // radio-buttons for selecting mode
     QButtonGroup *modebox = new QButtonGroup( this );
@@ -94,21 +90,21 @@ ScopeControl::ScopeControl(ScopeInterface *scope,ControllerClass* parentControll
     mode_yt   = new QRadioButton(tr("Y-T"), this);
     mode_xy   = new QRadioButton(tr("X-Y"), this);
     mode_fft  = new QRadioButton(tr("FFT"), this);
-    //connect(mode_none, SIGNAL(clicked()), SLOT(setModeNone()));
-    //connect(mode_yt,   SIGNAL(clicked()), SLOT(setModeYt()));
-    //connect(mode_xy,   SIGNAL(clicked()), SLOT(setModeXy()));
-    //connect(mode_fft,  SIGNAL(clicked()), SLOT(setModeFft()));
+    connect(mode_none, SIGNAL(clicked()), SLOT(setModeNone()));
+    connect(mode_yt,   SIGNAL(clicked()), SLOT(setModeYt()));
+    connect(mode_xy,   SIGNAL(clicked()), SLOT(setModeXy()));
+    connect(mode_fft,  SIGNAL(clicked()), SLOT(setModeFft()));
 
     // Trace list
     QGroupBox *traceListBox = new QGroupBox(tr("Available Traces"), this);
     tracelist = new QListWidget(traceListBox); //"traceListBox"
     // Allow selection of multiple traces
-    //tracelist->setSelectionMode(QListBox::Multi);
-    //connect(tracelist, SIGNAL(selectionChanged()), SLOT(setTraceList()));
+    tracelist->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    connect(tracelist, SIGNAL(selectionChanged()), SLOT(setTraceList()));
 
     // Hold - Checkbox
     hold = new QCheckBox(tr("Hold data"), this);
-    //connect(hold, SIGNAL(toggled(bool)), SLOT(setHold(bool)));    
+    connect(hold, SIGNAL(toggled(bool)), SLOT(setHold(bool)));    
 }
 
 ScopeControl::~ScopeControl() {}
