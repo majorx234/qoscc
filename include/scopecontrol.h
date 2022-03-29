@@ -103,7 +103,7 @@ private slots:
     void setTraceList();
     void setScopeName();
     void setScopeFont();
-    void setSweep(const std::string &);
+    void setSweep(const QString & text);
     void setModeNone();
     void setModeYt();
     void setModeXy();

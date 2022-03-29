@@ -100,7 +100,7 @@ ScopeControl::ScopeControl(ScopeInterface *scope,ControllerClass* parentControll
     tracelist = new QListWidget(traceListBox); //"traceListBox"
     // Allow selection of multiple traces
     tracelist->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    connect(tracelist, SIGNAL(selectionChanged()), SLOT(setTraceList()));
+    connect(tracelist, SIGNAL(itemSelectionChanged()), SLOT(setTraceList()));
 
     // Hold - Checkbox
     hold = new QCheckBox(tr("Hold data"), this);
@@ -227,7 +227,7 @@ ScopeControl::ScopeControl(ScopeInterface *scope,ControllerClass* parentControll
     sldLevel->setInterval(80);
     connect(sldLevel, SIGNAL(valueChanged(float)), SLOT(setTriggerLevel(float)));
     */
-    
+
     // XY-Mode trace selection
     globalXYBox = new QGroupBox(tr("YX - Settings"), this);
     QVBoxLayout* globalXYBoxLayout = new QVBoxLayout;
@@ -388,8 +388,8 @@ void ScopeControl::setScopeName() {
 
 // void setSweep(float)
 // set new sweep value
-void ScopeControl::setSweep(const std::string & text) {
-    double value = stringToNum(text);
+void ScopeControl::setSweep(const QString & text) {
+    double value = stringToNum(text.toStdString());
     if(!value) {
         emit setStatus(tr("Cannot set sweep to zero!"));
         return;
