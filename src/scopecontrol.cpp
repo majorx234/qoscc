@@ -185,57 +185,72 @@ ScopeControl::ScopeControl(ScopeInterface *scope,ControllerClass* parentControll
     dispDbMax->addItem("20 dB");
     connect(dispDbMax, SIGNAL(activated(const QString&)), SLOT(setDispDbMax(const QString&)));
 
-/* WIP
     // trigger section
     triggerbox = new QGroupBox(tr("Trigger"), this );
 
-    QWidget *miscopts = new QWidget(triggerbox);
-
-    // QButtonGroup tr("Edge"),
-    QButtonGroup *tedgebox = new QButtonGroup(miscopts);
-    
     QHBoxLayout *miscoptsLayout = new QHBoxLayout;
-    miscoptsLayout->addWidget(tedgebox);
     
+    QButtonGroup *tedgebox = new QButtonGroup(this);
 
-    tedgebox->setRadioButtonExclusive(1);
-    btnTedgeNone  = new QRadioButton( tr("None"), tedgebox);
-    btnTedgePositive  = new QRadioButton( tr("Positive"), tedgebox);
-    btnTedgeNegative   = new QRadioButton( tr("Negative"), tedgebox);
+    tedgebox->setExclusive(true);
+    
+    btnTedgeNone  = new QRadioButton( tr("None"), this);
+    btnTedgePositive  = new QRadioButton( tr("Positive"), this);
+    btnTedgeNegative   = new QRadioButton( tr("Negative"), this);
+
+    tedgebox->addButton(btnTedgeNone);
+    tedgebox->addButton(btnTedgePositive);
+    tedgebox->addButton(btnTedgeNegative);
+    miscoptsLayout->addWidget(btnTedgeNone);
+    miscoptsLayout->addWidget(btnTedgePositive);
+    miscoptsLayout->addWidget(btnTedgeNegative);
+    triggerbox->setLayout(miscoptsLayout);
+
     connect(btnTedgeNone,  SIGNAL(clicked()), SLOT(setTedgeNone()));
     connect(btnTedgePositive,  SIGNAL(clicked()), SLOT(setTedgePositive()));
     connect(btnTedgeNegative, SIGNAL(clicked()), SLOT(setTedgeNegative()));
 
-    // QButtonGroupe tr("Source")
-    QGroupBox *trgSrcBox = new QGroupBox(miscopts);
-    miscoptsLayout->addWidget(trgSrcBox);
-    miscopts->setLayout(miscoptsLayout);
-    triggerSource = new QComboBox(trgSrcBox, "Triggersource");
+    QGroupBox *trgSrcBox = new QGroupBox(tr("Source"), this);
+    QHBoxLayout *trgSrcBoxLayout = new QHBoxLayout;
+    // "Triggersource"
+    triggerSource = new QComboBox(this);
+    trgSrcBoxLayout->addWidget(triggerSource);
+    trgSrcBox->setLayout(trgSrcBoxLayout);
     connect(triggerSource, SIGNAL(activated(const QString&)), SLOT(setTriggerSource(const QString&)));
 
+    /*
+    //TODO
     sldLevel = new fSlider( triggerbox );
     sldLevel->setTitle(tr("Level"));
     sldLevel->setMaxValue(1.0);
     sldLevel->setMinValue(-1.0);
     sldLevel->setInterval(80);
     connect(sldLevel, SIGNAL(valueChanged(float)), SLOT(setTriggerLevel(float)));
-
+    */
     // XY-Mode trace selection
     globalXYBox = new QGroupBox(tr("YX - Settings"), this);
-    new QLabel(tr("Source X"), globalXYBox);
-    lstXTrace = new QComboBox(globalXYBox, "x source");
+    QVBoxLayout* globalXYBoxLayout = new QVBoxLayout;
+    QLabel* sourceX = new QLabel(tr("Source X"), this);
+    lstXTrace = new QComboBox(this);
     connect(lstXTrace, SIGNAL(activated(const QString&)), SLOT(setXSource(const QString&)));
-    new QLabel(tr("Source Y"), globalXYBox);
-    lstYTrace = new QComboBox(globalXYBox, "y source");
+    QLabel* sourceY = new QLabel(tr("Source Y"), this);
+    lstYTrace = new QComboBox(this);
     connect(lstYTrace, SIGNAL(activated(const QString&)), SLOT(setYSource(const QString&)));
+    globalXYBoxLayout->addWidget(sourceX);
+    globalXYBoxLayout->addWidget(lstXTrace);
+    globalXYBoxLayout->addWidget(sourceY);
+    globalXYBoxLayout->addWidget(lstXTrace);
+    globalXYBox->setLayout(globalXYBoxLayout);
 
     // misc. info
-    QVGroupBox *groupMisc = new QGroupBox(tr("Display information on trace:"), this);
-    infoTrace = new QComboBox(groupMisc);
+    QGroupBox *groupMisc = new QGroupBox(tr("Display information on trace:"), this);
+    QVBoxLayout *groupMiscLayout = new QVBoxLayout;
+    infoTrace = new QComboBox(this);
+    groupMiscLayout->addWidget(infoTrace);
+    groupMisc->setLayout(groupMiscLayout);
     connect(infoTrace, SIGNAL(activated(const QString&)), SLOT(setInfoTrace(const QString&)));
     
-    updateLocal();  
- */   
+    updateLocal();
 }
 
 ScopeControl::~ScopeControl() {}
