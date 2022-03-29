@@ -104,7 +104,138 @@ ScopeControl::ScopeControl(ScopeInterface *scope,ControllerClass* parentControll
 
     // Hold - Checkbox
     hold = new QCheckBox(tr("Hold data"), this);
-    connect(hold, SIGNAL(toggled(bool)), SLOT(setHold(bool)));    
+    connect(hold, SIGNAL(toggled(bool)), SLOT(setHold(bool)));  
+
+    // box for sweep
+    boxSweep = new QGroupBox(tr("Sweep"), this);
+    ytSweep = new QComboBox(boxSweep);
+    ytSweep->setEditable(true);
+    ytSweep->addItem("100 µs");
+    ytSweep->addItem("0.5 ms");
+    ytSweep->addItem("1 ms");
+    ytSweep->addItem("2 ms");
+    ytSweep->addItem("5 ms");
+    ytSweep->addItem("10 ms");
+    ytSweep->addItem("50 ms");
+    ytSweep->addItem("100 ms");
+    ytSweep->addItem("0.5 s");
+    ytSweep->addItem("1 s");
+    connect(ytSweep, SIGNAL(activated(const QString&)), SLOT(setSweep(const QString &)));
+
+    // scaling box
+    boxScaling = new QGroupBox(tr("Scaling"), this);
+    dispLog = new QCheckBox(tr("logarithmic scaling"), boxScaling);
+    connect(dispLog, SIGNAL(toggled(bool)), SLOT(setDispLog(bool)));
+    // dB - Display - Checkbox
+    dispDb = new QCheckBox(tr("dB scaling"), boxScaling);
+    connect(dispDb, SIGNAL(toggled(bool)), SLOT(setDispDb(bool)));
+    new QLabel(tr("Reference:"), boxScaling);
+    // dB - Display Reference ComboBox
+    dispDbRef = new QComboBox(boxScaling);
+    dispDbRef->setEditable(true);
+    dispDbRef->addItem("1 V");
+    dispDbRef->addItem("774.6 mV");
+    connect(dispDbRef, SIGNAL(activated(const QString&)), SLOT(setDispDbRef(const QString&)));
+
+    // Combo Boxes for frequency range selection
+    boxFRange = new QGroupBox(tr("Frequency ranges"), this);
+    dispFMin = new QComboBox(boxFRange);
+    dispFMin->setEditable(true);
+    dispFMin->addItem("10 Hz");
+    dispFMin->addItem("50 Hz");
+    dispFMin->addItem("100 Hz");
+    dispFMin->addItem("500 Hz");
+    dispFMin->addItem("1 kHz");
+    connect(dispFMin, SIGNAL(activated(const QString&)), SLOT(setDispFMin(const QString&)));
+    dispFMax = new QComboBox(boxFRange);
+    dispFMax->setEditable(true);
+    dispFMax->addItem("100 Hz");
+    dispFMax->addItem("500 Hz");
+    dispFMax->addItem("1 kHz");
+    dispFMax->addItem("5 kHz");
+    dispFMax->addItem("20 kHz");
+    connect(dispFMax, SIGNAL(activated(const QString&)), SLOT(setDispFMax(const QString&)));
+
+    // combo box for vertical volts per div
+    boxVDiv = new QGroupBox(tr("Volts per DIV"), this);
+    vDiv = new QComboBox(boxVDiv);
+    vDiv->setEditable(true);
+    vDiv->addItem("10 mV");
+    vDiv->addItem("50 mV");
+    vDiv->addItem("100 mV");
+    vDiv->addItem("500 mV");
+    vDiv->addItem("1 V");
+    vDiv->addItem("5 V");
+    vDiv->addItem("10 V");
+    connect(vDiv, SIGNAL(activated(const QString&)), SLOT(setVDiv(const QString&)));
+
+    // combo boxes for db-range selection
+    boxDbRange = new QGroupBox(tr("Level ranges"), this);
+    dispDbMin = new QComboBox(boxDbRange);
+    dispDbMin->setEditable(true);
+    dispDbMin->addItem("-50 dB");
+    dispDbMin->addItem("-90 dB");
+    dispDbMin->addItem("-100 dB");
+    dispDbMin->addItem("-150 dB");
+    connect(dispDbMin, SIGNAL(activated(const QString&)), SLOT(setDispDbMin(const QString&)));
+    dispDbMax = new QComboBox(boxDbRange);
+    dispDbMax->setEditable(true);
+    dispDbMax->addItem("-20 dB");
+    dispDbMax->addItem("0 dB");
+    dispDbMax->addItem("20 dB");
+    connect(dispDbMax, SIGNAL(activated(const QString&)), SLOT(setDispDbMax(const QString&)));
+
+/* WIP
+    // trigger section
+    triggerbox = new QGroupBox(tr("Trigger"), this );
+
+    QWidget *miscopts = new QWidget(triggerbox);
+
+    // QButtonGroup tr("Edge"),
+    QButtonGroup *tedgebox = new QButtonGroup(miscopts);
+    
+    QHBoxLayout *miscoptsLayout = new QHBoxLayout;
+    miscoptsLayout->addWidget(tedgebox);
+    
+
+    tedgebox->setRadioButtonExclusive(1);
+    btnTedgeNone  = new QRadioButton( tr("None"), tedgebox);
+    btnTedgePositive  = new QRadioButton( tr("Positive"), tedgebox);
+    btnTedgeNegative   = new QRadioButton( tr("Negative"), tedgebox);
+    connect(btnTedgeNone,  SIGNAL(clicked()), SLOT(setTedgeNone()));
+    connect(btnTedgePositive,  SIGNAL(clicked()), SLOT(setTedgePositive()));
+    connect(btnTedgeNegative, SIGNAL(clicked()), SLOT(setTedgeNegative()));
+
+    // QButtonGroupe tr("Source")
+    QGroupBox *trgSrcBox = new QGroupBox(miscopts);
+    miscoptsLayout->addWidget(trgSrcBox);
+    miscopts->setLayout(miscoptsLayout);
+    triggerSource = new QComboBox(trgSrcBox, "Triggersource");
+    connect(triggerSource, SIGNAL(activated(const QString&)), SLOT(setTriggerSource(const QString&)));
+
+    sldLevel = new fSlider( triggerbox );
+    sldLevel->setTitle(tr("Level"));
+    sldLevel->setMaxValue(1.0);
+    sldLevel->setMinValue(-1.0);
+    sldLevel->setInterval(80);
+    connect(sldLevel, SIGNAL(valueChanged(float)), SLOT(setTriggerLevel(float)));
+
+    // XY-Mode trace selection
+    globalXYBox = new QGroupBox(tr("YX - Settings"), this);
+    new QLabel(tr("Source X"), globalXYBox);
+    lstXTrace = new QComboBox(globalXYBox, "x source");
+    connect(lstXTrace, SIGNAL(activated(const QString&)), SLOT(setXSource(const QString&)));
+    new QLabel(tr("Source Y"), globalXYBox);
+    lstYTrace = new QComboBox(globalXYBox, "y source");
+    connect(lstYTrace, SIGNAL(activated(const QString&)), SLOT(setYSource(const QString&)));
+
+    // misc. info
+    QVGroupBox *groupMisc = new QGroupBox(tr("Display information on trace:"), this);
+    infoTrace = new QComboBox(groupMisc);
+    connect(infoTrace, SIGNAL(activated(const QString&)), SLOT(setInfoTrace(const QString&)));
+    
+    updateLocal();  
+ */   
 }
 
 ScopeControl::~ScopeControl() {}
