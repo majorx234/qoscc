@@ -227,6 +227,7 @@ ScopeControl::ScopeControl(ScopeInterface *scope,ControllerClass* parentControll
     sldLevel->setInterval(80);
     connect(sldLevel, SIGNAL(valueChanged(float)), SLOT(setTriggerLevel(float)));
     */
+    
     // XY-Mode trace selection
     globalXYBox = new QGroupBox(tr("YX - Settings"), this);
     QVBoxLayout* globalXYBoxLayout = new QVBoxLayout;
