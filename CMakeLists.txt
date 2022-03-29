@@ -18,78 +18,78 @@ find_package(PkgConfig)
 pkg_check_modules(FFTW3 REQUIRED fftw3)
 
 set(MISC_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/misc.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/misc.h
+  src/misc.cpp
+  include/misc.h
 )
 
 set(STRINGLIST_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/stringlist.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/stringlist.h
+  src/stringlist.cpp
+  include/stringlist.h
 )
 
 set(DBUFFER_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/dbuffer.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/dbuffer.h
+  src/dbuffer.cpp
+  include/dbuffer.h
 )
 
 set(DSPCOMMON_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/dspcommon.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/dspcommon.h
+  src/dspcommon.cpp
+  include/dspcommon.h
 )
 
 set(DSPALSA_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/dspalsa.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/dspalsa.h
+  src/dspalsa.cpp
+  include/dspalsa.h
 )
 
 set(DSPJACK_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/dspjack.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/dspjack.h
+  src/dspjack.cpp
+  include/dspjack.h
 )
 
 set(DSPMM_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/dspmm.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/dspmm.h
+  src/dspmm.cpp
+  include/dspmm.h
 )
 
 set(DSPNONE_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/dspnone.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/dspnone.h
+  src/dspnone.cpp
+  include/dspnone.h
 )
 
 set(CONTROLLERCLASS_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/controllerclass.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/controllerclass.h
+  src/controllerclass.cpp
+  include/controllerclass.h
 )
 
 set(DEVICECLASS_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/deviceclass.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/deviceclass.h
+  src/deviceclass.cpp
+  include/deviceclass.h
 )
 
 set(TRACECLASS_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/traceclass.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/traceclass.h
+  src/traceclass.cpp
+  include/traceclass.h
 )
 
 set(SCOPECLASS_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/scopeclass.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/scopeclass.h
+  src/scopeclass.cpp
+  include/scopeclass.h
 )
 
 set(SCOPECONTROL_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/scopecontrol.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/scopecontrol.h
+  src/scopecontrol.cpp
+  include/scopecontrol.h
 )
 
 set(TRACECONTROL_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/tracecontrol.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/tracecontrol.h
+  src/tracecontrol.cpp
+  include/tracecontrol.h
 )
 
 set(DEVICECONTROL_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/devicecontrol.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/devicecontrol.h
+  src/devicecontrol.cpp
+  include/devicecontrol.h
 )
 
 set(QOSCCWINDOW_SOURCES
