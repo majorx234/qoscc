@@ -57,6 +57,11 @@ set(DSPNONE_SOURCES
   include/dspnone.h
 )
 
+set(FSLIDER_SOURCES
+  src/fslider.cpp
+  include/fslider.h
+)
+
 set(CONTROLLERCLASS_SOURCES
   src/controllerclass.cpp
   include/controllerclass.h
@@ -114,6 +119,9 @@ QT5_WRAP_CPP( QOSCCWINDOW_MOCSOURCES
   ${QOSCCWINDOW_SOURCES}
 )
 
+QT5_WRAP_CPP( FSLIDER_MOCSOURCES
+  ${FSLIDER_SOURCES}
+)
 QT5_WRAP_CPP( SCOPECONTROL_MOCSOURCES
   ${SCOPECONTROL_SOURCES}
 )
@@ -202,6 +210,20 @@ target_include_directories(dspnone PRIVATE include)
 target_link_libraries(dspnone
   dspcommon
   dbuffer
+)
+
+add_library(fslider
+  ${FSLIDER_SOURCES}
+  ${FSLIDER_MOCSOURCES}
+)
+target_include_directories(fslider PRIVATE include)
+target_include_directories(fslider SYSTEM
+  PUBLIC 
+    ${Qt5Core_INCLUDE_DIRS}
+    ${Qt5Widgets_INCLUDE_DIRS})
+target_link_libraries(fslider
+    Qt5::Core
+    Qt5::Widgets
 )
 
 add_library(controllerclass
