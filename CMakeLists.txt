@@ -335,3 +335,29 @@ target_include_directories(qoscc_test PRIVATE include)
 target_link_libraries(qoscc_test
   qosccwindow 
 )
+
+###### test code ######
+set(FSLIDER_TEST_SOURCES
+  tests/fslider_test.cpp
+)
+
+QT5_WRAP_CPP( FSLIDER_MOCSOURCES
+  ${FSLIDER_TEST_SOURCES}
+)
+
+add_executable(fslider_test 
+    ${FSLIDER_TEST_SOURCES}
+    ${FSLIDER_TEST_MOCSOURCES}
+)
+target_include_directories(fslider_test PRIVATE include)
+target_include_directories(fslider_test PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(fslider_test SYSTEM
+  PUBLIC 
+    ${Qt5Core_INCLUDE_DIRS}
+    ${Qt5Widgets_INCLUDE_DIRS})
+
+target_link_libraries(fslider_test PUBLIC
+    Qt5::Core
+    Qt5::Widgets
+    fslider
+)
