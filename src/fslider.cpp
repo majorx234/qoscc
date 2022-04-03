@@ -22,6 +22,7 @@
 #include <QSlider>
 #include <QString>
 #include <QLineEdit>
+#include <QHBoxLayout>
 
 fSlider::fSlider(const  QString name, QWidget *parent) : QGroupBox(name, parent) {
     min = -10.0;
@@ -31,6 +32,7 @@ fSlider::fSlider(const  QString name, QWidget *parent) : QGroupBox(name, parent)
 
     slider = new QSlider( this );
     textval = new QLineEdit( this );
+    QHBoxLayout *hbox = new QHBoxLayout(this);
 
     textval->setMinimumWidth(80);
     textval->setMaximumWidth(80);
@@ -48,9 +50,14 @@ fSlider::fSlider(const  QString name, QWidget *parent) : QGroupBox(name, parent)
     slider->setMinimum(int(min * interval));
     slider->setMaximum(int(max * interval));
     slider->setTickInterval(int(interval));
-
+    
     connect(slider, SIGNAL(valueChanged(int)), SLOT(intValueChanges(int)));
     connect(textval, SIGNAL(textChanged(const QString&)), SLOT(textValueChanges(const QString&)));
+
+    hbox->addWidget(slider);
+    hbox->addWidget(textval);
+    hbox->addStretch(1);
+    setLayout(hbox);
 }
 
 fSlider::~fSlider() {}
