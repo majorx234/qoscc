@@ -33,10 +33,10 @@ void ScopeClass::initVars() {
     vdivs = 8;
     name = "NoNameScope";
     tracenum = 0;
-    bcol    = "#000000";
-    gridcol = "#009f00";
-    markcol = "#ffffff";
-    textcol = "#ffffff";
+//    bcol    = "#000000";
+//    gridcol = "#009f00";
+//    markcol = "#ffffff";
+//    textcol = "#ffffff";
     mode    = M_YT;
     sweep = 0.002;
     trigger_edge = TE_NONE;
@@ -145,10 +145,10 @@ void ScopeClass::dump(FILE *file) {
 // TOFIX: x,y? from qt element?
 //    fprintf(file, "x = %d\n", x());
 //    fprintf(file, "y = %d\n", y());
-    fprintf(file, "bcol = %s\n", bcol.c_str());
-    fprintf(file, "gridcol = %s\n", gridcol.c_str());
-    fprintf(file, "markcol = %s\n", markcol.c_str());
-    fprintf(file, "textcol = %s\n", textcol.c_str());
+//    fprintf(file, "bcol = %s\n", bcol.c_str());
+//    fprintf(file, "gridcol = %s\n", gridcol.c_str());
+//    fprintf(file, "markcol = %s\n", markcol.c_str());
+//    fprintf(file, "textcol = %s\n", textcol.c_str());
 //    fprintf(file, "font = %s\n", font.toString().ascii());
     for(unsigned int i = 0; i < tracenum; i++)
         fprintf(file, "trace = %s\n", traces[i]->getName().c_str());
@@ -402,22 +402,6 @@ double ScopeClass::getSweep() {
     return sweep;
 }
 
-std::string ScopeClass::getGridCol() {
-    return gridcol;
-}
-
-std::string ScopeClass::getBCol() {
-    return bcol;
-}
-
-std::string ScopeClass::getTextCol() {
-    return textcol;
-}
-
-std::string ScopeClass::getMarkCol() {
-    return markcol;
-}
-
 unsigned int ScopeClass::getHDivs() {
     return hdivs;
 }
@@ -442,26 +426,6 @@ void ScopeClass::setMode(int newmode) {
 void ScopeClass::setSweep(double newsweep) {
     std::lock_guard<std::shared_mutex> lock(mutex);
     sweep = newsweep;
-}
-
-void ScopeClass::setGridCol(const std::string& color) {
-    std::lock_guard<std::shared_mutex> lock(mutex);
-    gridcol = color;
-}
-
-void ScopeClass::setBCol(const std::string& color) {
-    std::lock_guard<std::shared_mutex> lock(mutex);
-    bcol = color;
-}
-
-void ScopeClass::setMarkCol(const std::string& color) {
-    std::lock_guard<std::shared_mutex> lock(mutex);
-    markcol = color;
-}
-
-void ScopeClass::setTextCol(const std::string& color) {
-    std::lock_guard<std::shared_mutex> lock(mutex);
-    textcol = color;
 }
 
 void ScopeClass::setHDivs(unsigned int n) {

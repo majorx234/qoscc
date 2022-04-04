@@ -25,6 +25,7 @@
 #include <QTabWidget>
 
 #include "scopeinterface.h"
+#include "scopeview.h"
 #include "controllerclass.h"
 
 //ToDo implement fslider
@@ -33,7 +34,12 @@
 class ScopeControl : public QGroupBox {
     Q_OBJECT
 public:
-    ScopeControl(ScopeInterface *scope,ControllerClass* parentController, QTabWidget *parent = 0, const std::string = "");
+    ScopeControl(ScopeInterface *scope,
+        ScopeView* view,
+        ControllerClass* parentController,
+        QTabWidget *parent = 0,
+        const std::string = ""
+        );
     ~ScopeControl();
 
 public slots:
@@ -45,6 +51,7 @@ signals:
 
 private:
     ScopeInterface *thisscope;
+    ScopeView *_view;
     ControllerClass *_parentController;
 
     QPushButton *btnColGrid;

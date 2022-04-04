@@ -349,6 +349,7 @@ target_link_libraries(qosccwindow PUBLIC
     Qt5::Widgets
     controllerclass
     scopecontrol
+    scopeview
     devicecontrol
     tracecontrol
 )

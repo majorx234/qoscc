@@ -42,8 +42,14 @@
 #include "misc.h"
 #include "datastoredialog.h"
 
-ScopeControl::ScopeControl(ScopeInterface *scope,ControllerClass* parentController, QTabWidget *parent, const std::string name) 
+ScopeControl::ScopeControl(ScopeInterface *scope,
+    ScopeView* view,
+    ControllerClass* parentController,
+    QTabWidget *parent,
+    const std::string name
+    )
   : QGroupBox(QString::fromStdString(name),parent)
+  , _view(view)
   ,_parentController(parentController)
 {
     thisscope = scope;
@@ -258,30 +264,30 @@ ScopeControl::~ScopeControl() {}
 
 void ScopeControl::setColGrid() {
     QColor col;
-    col = QColorDialog::getColor(QString::fromStdString(thisscope->getGridCol()));
+    col = QColorDialog::getColor(QString::fromStdString(_view->getGridCol()));
     if(col.isValid())
-        thisscope->setGridCol(col.name().toStdString());
+        _view->setGridCol(col.name().toStdString());
 }
 
 void ScopeControl::setColMark() {
     QColor col;
-    col = QColorDialog::getColor(QString::fromStdString(thisscope->getMarkCol()));
+    col = QColorDialog::getColor(QString::fromStdString(_view->getMarkCol()));
     if(col.isValid())
-        thisscope->setMarkCol(col.name().toStdString());
+        _view->setMarkCol(col.name().toStdString());
 }
 
 void ScopeControl::setColBg() {
     QColor col;
-    col = QColorDialog::getColor(QString::fromStdString(thisscope->getBCol()));
+    col = QColorDialog::getColor(QString::fromStdString(_view->getBCol()));
     if(col.isValid())
-        thisscope->setBCol(col.name().toStdString());
+        _view->setBCol(col.name().toStdString());
 }
 
 void ScopeControl::setColText() {
     QColor col;
-    col = QColorDialog::getColor(QString::fromStdString(thisscope->getTextCol()));
+    col = QColorDialog::getColor(QString::fromStdString(_view->getTextCol()));
     if(col.isValid())
-        thisscope->setTextCol(col.name().toStdString());
+        _view->setTextCol(col.name().toStdString());
 }
 
 void ScopeControl::updateLocal() {

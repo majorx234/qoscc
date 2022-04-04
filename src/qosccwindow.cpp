@@ -52,7 +52,8 @@ void QOscCWindow::createControls() {
     stringlist scopeliste;
     controller->getScopeList(&scopeliste);
     for(unsigned int i = 0; i < scopeliste.count(); i++) {
-        ScopeControl *scopectl = new ScopeControl(controller->getScope(scopeliste.getString(i)), controller, groups, "scope");
+        //TOFIX needs list of views for Scopes here , instead of nullptr when creating ScopeControl
+        ScopeControl *scopectl = new ScopeControl(controller->getScope(scopeliste.getString(i)),nullptr, controller, groups, "scope");
         QString title = QString(tr("Scope %1")).arg(QString::fromStdString(scopeliste.getString(i)));
         groups->addTab(scopectl, title);
         connect(this, SIGNAL(hasChanged()), scopectl, SLOT(update()));
@@ -232,8 +233,13 @@ void QOscCWindow::addScope() {
     newscope->setName(name.toStdString());
     controller->addScope(newscope);
 
+    //create new ScopeView
+    //ToFix add newscopeview in some list
+    //ToFix parameter name in constructor?
+    ScopeView *newscopeview = new ScopeView(newscope, this);
+
     // add control
-    ScopeControl *scopectl = new ScopeControl(newscope, controller, groups, "scope");
+    ScopeControl *scopectl = new ScopeControl(newscope, newscopeview, controller, groups, "scope");
     QString title = QString(tr("Scope ")) + name;
     groups->addTab(scopectl, title);
     groups->hide();

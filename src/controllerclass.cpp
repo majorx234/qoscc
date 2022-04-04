@@ -421,14 +421,14 @@ int ControllerClass::readconfig(const std::string &file) {
                         printf("no such parameter for mode in [scope]: %s\n", thelp);
                 } else if(!strncmp("sweep = ", confline, 8))
                     currscope->setSweep(getfparam(confline));
-                else if(!strncmp("bcol = ", confline, 7))
-                    currscope->setBCol(getsparam(confline));
-                else if(!strncmp("gridcol = ", confline, 10))
-                    currscope->setGridCol(getsparam(confline));
-                else if(!strncmp("markcol = ", confline, 10))
-                    currscope->setMarkCol(getsparam(confline));
-                else if(!strncmp("textcol = ", confline, 10))
-                    currscope->setTextCol(getsparam(confline));
+//ToFix                else if(!strncmp("bcol = ", confline, 7))
+//ToFix                    currscope->setBCol(getsparam(confline));
+//ToFix                else if(!strncmp("gridcol = ", confline, 10))
+//ToFix                    currscope->setGridCol(getsparam(confline));
+//ToFix                else if(!strncmp("markcol = ", confline, 10))
+//ToFix                    currscope->setMarkCol(getsparam(confline));
+//ToFix                else if(!strncmp("textcol = ", confline, 10))
+//ToFix                    currscope->setTextCol(getsparam(confline));
                 else if(!strncmp("font = ", confline, 7))
                     currscope->setFont(getsparam(confline));
                 else if(!strncmp("width = ", confline, 8))

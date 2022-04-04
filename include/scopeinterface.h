@@ -40,10 +40,10 @@ public:
 
   virtual int getMode() = 0;
   virtual double getSweep() = 0;
-  virtual std::string getGridCol() = 0;
-  virtual std::string getBCol() = 0;
-  virtual std::string getMarkCol() = 0;
-  virtual std::string getTextCol() = 0;
+//  virtual std::string getGridCol() = 0;
+//  virtual std::string getBCol() = 0;
+//  virtual std::string getMarkCol() = 0;
+//  virtual std::string getTextCol() = 0;
   virtual unsigned int getHDivs() = 0;
   virtual unsigned int getVDivs() = 0;
   virtual int getTriggerEdge() = 0;
@@ -63,10 +63,10 @@ public:
 
   virtual void setMode(int) = 0;
   virtual void setSweep(double) = 0;
-  virtual void setGridCol(const std::string&) = 0;
-  virtual void setBCol(const std::string&) = 0;
-  virtual void setMarkCol(const std::string&) = 0;
-  virtual void setTextCol(const std::string&) = 0;
+//  virtual void setGridCol(const std::string&) = 0;
+//  virtual void setBCol(const std::string&) = 0;
+//  virtual void setMarkCol(const std::string&) = 0;
+//  virtual void setTextCol(const std::string&) = 0;
   virtual void setHDivs(unsigned int) = 0;
   virtual void setVDivs(unsigned int) = 0;
   virtual void setTriggerEdge(int) = 0;

@@ -58,10 +58,6 @@ public:
 
   int getMode();
   double getSweep();
-  std::string getGridCol();
-  std::string getBCol();
-  std::string getMarkCol();
-  std::string getTextCol();
   unsigned int getHDivs();
   unsigned int getVDivs();
   int getTriggerEdge();
@@ -91,10 +87,6 @@ public:
 
   void setMode(int);
   void setSweep(double);
-  void setGridCol(const std::string&);
-  void setBCol(const std::string&);
-  void setMarkCol(const std::string&);
-  void setTextCol(const std::string&);
   void setHDivs(unsigned int);
   void setVDivs(unsigned int);
   void setTriggerEdge(int);
@@ -146,7 +138,6 @@ private:
 
   int trigger_pos;
     
-  std::string bcol, gridcol, markcol, textcol;
   unsigned int hdivs, vdivs;     // horizontal and vertial divisions  
 
   double sweep;                  // sweep (time to pass one div, in secs)  

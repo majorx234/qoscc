@@ -27,10 +27,21 @@ public:
   unsigned int getMouseX();
   unsigned int getMouseY();
   void setMouseX(unsigned int);
-  void setMouseY(unsigned int);  
+  void setMouseY(unsigned int);
   int getScreenPos(double);
 
   bool update(const int value) override;
+
+  std::string getGridCol();
+  std::string getBCol();
+  std::string getMarkCol();
+  std::string getTextCol();
+
+  void setGridCol(const std::string&);
+  void setBCol(const std::string&);
+  void setMarkCol(const std::string&);
+  void setTextCol(const std::string&);
+
 private:
   ScopeInterface* modelScope;
   
@@ -43,10 +54,11 @@ private:
   inline void draw_triglvl(int trace);
   inline void grid();
   inline void grid_fft();
-  inline double calcx(int buffpos, int trace);  
+  inline double calcx(int buffpos, int trace);
   QPainter *painter;
-  QPixmap *pm; 
-  QFont font;    
+  QPixmap *pm;
+  QFont font;
+  std::string bcol, gridcol, markcol, textcol;
 
   std::mutex bltMutex;
 
