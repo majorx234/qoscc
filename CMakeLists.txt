@@ -97,6 +97,11 @@ set(DEVICECONTROL_SOURCES
   include/devicecontrol.h
 )
 
+set(SCOPEVIEW_SOURCES
+  src/scopeview.cpp
+  include/scopeview.h
+)
+
 set(QOSCCWINDOW_SOURCES
     src/qosccwindow.cpp
     include/qosccwindow.h)
@@ -122,6 +127,7 @@ QT5_WRAP_CPP( QOSCCWINDOW_MOCSOURCES
 QT5_WRAP_CPP( FSLIDER_MOCSOURCES
   ${FSLIDER_SOURCES}
 )
+
 QT5_WRAP_CPP( SCOPECONTROL_MOCSOURCES
   ${SCOPECONTROL_SOURCES}
 )
@@ -132,6 +138,10 @@ QT5_WRAP_CPP( TRACECONTROL_MOCSOURCES
 
 QT5_WRAP_CPP( DEVICECONTROL_MOCSOURCES
   ${DEVICECONTROL_SOURCES}
+)
+
+QT5_WRAP_CPP( SCOPEVIEW_MOCSOURCES
+  ${SCOPEVIEW_SOURCES}
 )
 
 add_library(misc
@@ -305,12 +315,28 @@ target_link_libraries(scopecontrol PUBLIC
     datastoredialog
 )
 
+add_library(scopeview
+            ${SCOPEVIEW_SOURCES}
+            ${SCOPEVIEW_MOCSOURCES}
+)
+target_include_directories(scopeview PRIVATE include)
+target_include_directories(scopeview PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(scopeview SYSTEM
+  PUBLIC 
+    ${Qt5Core_INCLUDE_DIRS}
+    ${Qt5Widgets_INCLUDE_DIRS})
+target_link_libraries(scopeview PUBLIC
+    Qt5::Core
+    Qt5::Widgets
+    controllerclass
+    datastoredialog
+)
+
 add_library(qosccwindow
             ${QOSCCWINDOW_SOURCES}
             ${QOSCCWINDOW_MOCSOURCES}
             ${UISrcs}
             )
-
 target_include_directories(qosccwindow PRIVATE include)
 target_include_directories(qosccwindow PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_include_directories(qosccwindow SYSTEM
