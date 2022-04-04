@@ -37,8 +37,6 @@ void ScopeClass::initVars() {
     gridcol = "#009f00";
     markcol = "#ffffff";
     textcol = "#ffffff";
-    mouse_x = 0;
-    mouse_y = 0;
     mode    = M_YT;
     sweep = 0.002;
     trigger_edge = TE_NONE;
@@ -490,16 +488,6 @@ void ScopeClass::setHold(bool newhold) {
     std::lock_guard<std::shared_mutex> lock(mutex);
     hold = newhold;
 }
-//TOFIX
-/*
-unsigned int ScopeClass::getMouseX() {
-    return mouse_x;
-}
-
-unsigned int ScopeClass::getMouseY() {
-    return mouse_y;
-}
-*/
 
 bool ScopeClass::triggerLocked() {
     return trigger_locked;

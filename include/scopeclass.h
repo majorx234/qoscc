@@ -166,7 +166,6 @@ private:
   bool dispDb;
   double dispDbRef; 
 
-  unsigned int mouse_x, mouse_y; // position of mouse pointer
   unsigned int dispFMin, dispFMax;
 
   std::string infoTraceName;
