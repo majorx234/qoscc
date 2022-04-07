@@ -224,15 +224,15 @@ ScopeControl::ScopeControl(ScopeInterface *scope,
     trgSrcBox->setLayout(trgSrcBoxLayout);
     connect(triggerSource, SIGNAL(activated(const QString&)), SLOT(setTriggerSource(const QString&)));
 
-    /*
+    
     //TODO
-    sldLevel = new fSlider( triggerbox );
+    sldLevel = new fSlider("", this);
     sldLevel->setTitle(tr("Level"));
     sldLevel->setMaxValue(1.0);
     sldLevel->setMinValue(-1.0);
     sldLevel->setInterval(80);
+    miscoptsLayout->addWidget(sldLevel);
     connect(sldLevel, SIGNAL(valueChanged(float)), SLOT(setTriggerLevel(float)));
-    */
 
     // XY-Mode trace selection
     globalXYBox = new QGroupBox(tr("YX - Settings"), this);

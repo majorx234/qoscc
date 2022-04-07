@@ -281,6 +281,7 @@ target_include_directories(tracecontrol SYSTEM
 target_link_libraries(tracecontrol PUBLIC
     Qt5::Core
     Qt5::Widgets
+    fslider
 )
 
 add_library(devicecontrol
@@ -313,6 +314,7 @@ target_link_libraries(scopecontrol PUBLIC
     Qt5::Widgets
     controllerclass
     datastoredialog
+    fslider
 )
 
 add_library(scopeview

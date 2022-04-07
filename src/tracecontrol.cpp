@@ -41,7 +41,7 @@
 #include <QToolTip>
 #include <QVBoxLayout>
 
-//#include "fslider.h"
+#include "fslider.h"
 
 #include "traceclass.h"
 #include "controllerclass.h"
@@ -83,17 +83,16 @@ TraceControl::TraceControl(TraceInterface *n, ControllerClass* parentController,
     connect(parentChannel, SIGNAL(highlighted(const QString &)), SLOT(setParentChannel(const QString &)));
 
     // slider for X-Shift of trace
-    // TODO
-    // sldXPos = new fSlider( this );
-    // sldXPos->setInterval(10);
-    // sldXPos->setTitle(tr("X-Position (DIVS)"));
-    // connect(sldXPos, SIGNAL(valueChanged(float)), SLOT(setXPos(float)));
+    sldXPos = new fSlider("XPos Slider", this );
+    sldXPos->setInterval(10);
+    sldXPos->setTitle(tr("X-Position (DIVS)"));
+    connect(sldXPos, SIGNAL(valueChanged(float)), SLOT(setXPos(float)));
 
-    // slider for Y-Shift of trace
-    // sldYPos = new fSlider( this );
-    // sldYPos->setInterval(10);
-    // sldYPos->setTitle(tr("Y-Position (DIVS)"));
-    // connect(sldYPos, SIGNAL(valueChanged(float)), SLOT(setYPos(float)));
+    //slider for Y-Shift of trace
+    sldYPos = new fSlider("YPos Slider", this );
+    sldYPos->setInterval(10);
+    sldYPos->setTitle(tr("Y-Position (DIVS)"));
+    connect(sldYPos, SIGNAL(valueChanged(float)), SLOT(setYPos(float)));
 
     QGroupBox *box = new QGroupBox(tr("FFT Windowing"), this);
     fftWin = new QComboBox(box);

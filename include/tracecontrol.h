@@ -34,7 +34,7 @@
 #include <QString>
 #include <QWidget>
 
-// #include "fslider.h"
+ #include "fslider.h"
 #include "traceinterface.h"
 #include "controllerclass.h"
 
@@ -57,10 +57,9 @@ private:
     ControllerClass* _parentController;
 
     QPushButton *btnTCol;
-
- //TODO   
- //   fSlider *sldXPos;
- //   fSlider *sldYPos;
+ 
+    fSlider *sldXPos;
+    fSlider *sldYPos;
     QComboBox *parentList;
     QComboBox *parentChannel;
 

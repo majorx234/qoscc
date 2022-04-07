@@ -28,8 +28,7 @@
 #include "scopeview.h"
 #include "controllerclass.h"
 
-//ToDo implement fslider
-//#include "fslider.h"
+#include "fslider.h"
 
 class ScopeControl : public QGroupBox {
     Q_OBJECT
@@ -72,8 +71,7 @@ private:
     QRadioButton *btnTedgePositive;
     QRadioButton *btnTedgeNegative;
 
-//TODO
-//    fSlider *sldLevel;
+    fSlider *sldLevel;
     QComboBox *triggerSource;
     QGroupBox *triggerbox;
 
